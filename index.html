@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>班級即時打字對戰系統 | Typing Battle</title>
+  <title>打字王爭霸戰 — 三年級趣味打字對決</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -11,9 +11,9 @@
       font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, -apple-system, sans-serif;
       background-color: #eef2ff;
       background-image: 
-        radial-gradient(at 10% 10%, rgba(129, 140, 248, 0.22) 0px, transparent 50%),
-        radial-gradient(at 90% 15%, rgba(52, 211, 153, 0.20) 0px, transparent 50%),
-        radial-gradient(at 50% 90%, rgba(251, 146, 60, 0.16) 0px, transparent 55%),
+        radial-gradient(at 8% 12%, rgba(99, 102, 241, 0.24) 0px, transparent 50%),
+        radial-gradient(at 92% 14%, rgba(16, 185, 129, 0.20) 0px, transparent 50%),
+        radial-gradient(at 50% 92%, rgba(245, 158, 11, 0.18) 0px, transparent 55%),
         radial-gradient(#cbd5e1 1px, transparent 1px);
       background-size: 100% 100%, 100% 100%, 100% 100%, 24px 24px;
       color: #0f172a;
@@ -30,7 +30,7 @@
     }
     /* 角色卡片懸停微浮動 */
     .role-card {
-      transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease, border-color 0.28s ease;
+      transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease;
     }
     .role-card:hover {
       transform: translateY(-6px);
@@ -40,16 +40,26 @@
       background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
       box-shadow: 0 8px 0 #cbd5e1, 0 15px 25px -5px rgba(15, 23, 42, 0.12);
     }
+    .boss-keycap-card {
+      background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+      box-shadow: 0 8px 0 #f59e0b, 0 15px 30px -5px rgba(217, 119, 6, 0.25);
+    }
     /* 深色星空競技場計分板 */
     .arena-scoreboard {
       background: radial-gradient(circle at top right, #312e81 0%, #0f172a 65%, #020617 100%);
     }
-    /* 拔河進度條平滑動畫與發光火花 */
+    .boss-arena-scoreboard {
+      background: radial-gradient(circle at top left, #581c87 0%, #1e1b4b 55%, #090d16 100%);
+    }
+    /* 拔河進度條平滑動畫與發光 */
     .tug-transition {
       transition: width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .tug-glow-blue {
-      box-shadow: 0 0 14px rgba(56, 189, 248, 0.75);
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.8);
+    }
+    .tug-glow-gold {
+      box-shadow: 0 0 16px rgba(251, 191, 36, 0.85);
     }
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
@@ -83,7 +93,7 @@
 </head>
 <body class="min-h-screen flex flex-col relative">
 
-  <!-- 全域錯誤診斷提示條 (僅在意外錯誤時顯示) -->
+  <!-- 全域錯誤提示條 -->
   <div id="global-error-banner" class="hidden bg-rose-600 text-white px-4 py-2 text-xs font-bold text-center z-50"></div>
 
   <!-- 背景裝飾光暈 -->
@@ -108,8 +118,8 @@
           ⌨️
         </div>
         <div>
-          <h1 class="text-lg sm:text-xl font-black text-slate-800 tracking-tight leading-none">班級即時打字對戰系統</h1>
-          <span class="text-xs text-indigo-600 font-bold">國小三年級歡樂版 • 免伺服器即時連線</span>
+          <h1 class="text-lg sm:text-xl font-black text-slate-800 tracking-tight leading-none">打字王爭霸戰</h1>
+          <span class="text-xs text-indigo-600 font-bold">三年級趣味打字對決 • 支援雙人聯手挑戰老師魔王</span>
         </div>
       </div>
 
@@ -142,13 +152,13 @@
         <span class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-sky-500 text-white text-xs font-black tracking-wide shadow-md shadow-indigo-500/20 mb-4">
           <span>⚡ 校園電競打字賽</span>
           <span>•</span>
-          <span>三年級基礎單字 &amp; 詞語</span>
+          <span>1v1 互打 &amp; 2v1 魔王挑戰賽</span>
         </span>
         <h2 class="text-3xl sm:text-5xl font-black text-slate-900 mb-3 tracking-tight">
-          誰是班上的<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-sky-500 to-orange-500">打字小神手</span>？
+          三年級<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-sky-500 to-orange-500">趣味打字對決</span>
         </h2>
         <p class="text-slate-600 text-base sm:text-lg font-medium">
-          老師一鍵開房自動兩兩配對，學生輸入 4 碼房號，展開刺激的 1 對 1 打字拔河賽！
+          支援英文單字、中文詞語兩兩對戰，還能讓<strong>兩位學生聯手</strong>挑戰<strong>大魔王老師</strong>！
         </p>
       </div>
 
@@ -162,23 +172,29 @@
                 👩‍🏫
               </div>
               <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-black border border-amber-200">
-                HOST 控制台
+                HOST 控制台 / 魔王參戰
               </span>
             </div>
             <h3 class="text-2xl font-black text-slate-800 mb-2">我是老師 (建立房間)</h3>
             <p class="text-slate-600 text-sm leading-relaxed mb-6">
-              產生 4 位數房間代碼、切換三年級中/英文題庫與比賽時間、管理學生兩兩配對，並在大螢幕即時轉播全班戰況！
+              產生 4 碼房號、選擇「英文 / 中文 / 魔王挑戰賽 (×3/×2/×1 倍率)」，並可在魔王模式親自上場與兩位學生聯隊同場打字對決！
             </p>
           </div>
-          <div class="space-y-3">
+          <div class="space-y-2.5">
             <button onclick="initTeacherRole()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-slate-900 hover:from-indigo-700 hover:to-slate-950 text-amber-300 font-black text-lg shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2 border border-indigo-500/30">
               <span>👑 建立對戰房間</span>
               <span>→</span>
             </button>
-            <button onclick="startSoloDemoMode()" class="w-full py-2.5 px-4 rounded-xl bg-indigo-50/90 hover:bg-indigo-100 text-indigo-700 font-bold text-xs border border-indigo-200/80 transition flex items-center justify-center gap-1.5">
-              <span>🧪</span>
-              <span>單機模擬測試 (立即體驗學生 vs 電腦對戰)</span>
-            </button>
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="startSoloDemoMode()" class="py-2.5 px-3 rounded-xl bg-indigo-50/90 hover:bg-indigo-100 text-indigo-700 font-bold text-xs border border-indigo-200/80 transition flex items-center justify-center gap-1">
+                <span>🧪</span>
+                <span>單機體驗 (學生 1v1)</span>
+              </button>
+              <button onclick="startTeacherBossDemoMode()" class="py-2.5 px-3 rounded-xl bg-amber-50/90 hover:bg-amber-100 text-amber-800 font-bold text-xs border border-amber-200/80 transition flex items-center justify-center gap-1">
+                <span>👹</span>
+                <span>單機體驗 (老師當魔王)</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -196,7 +212,7 @@
             </div>
             <h3 class="text-2xl font-black text-slate-800 mb-2">我是學生 (加入房間)</h3>
             <p class="text-slate-600 text-sm leading-relaxed mb-5">
-              輸入老師黑板上的 4 位數房間代碼與你的座號姓名，等待配對後即可上場挑戰！
+              輸入老師的 4 位數房間代碼與你的座號姓名，準備和同學單挑或一起聯手打敗大魔王老師！
             </p>
 
             <div class="space-y-4 mb-6">
@@ -238,33 +254,33 @@
           </div>
 
           <div>
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
               <span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-extrabold border border-indigo-200">
                 已連線學生：<span id="teacher-student-count">0</span> 人
               </span>
               <span id="teacher-status-pill" class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-extrabold border border-amber-200">
-                等待配對與開始
+                等待設定與開始
               </span>
             </div>
-            <p class="text-sm text-slate-600 font-medium mt-1.5">請學生開啟網頁並輸入左側 4 碼房號加入教室（或點右側新增虛擬學生測試）。</p>
+            <p class="text-sm text-slate-600 font-medium mt-1.5">選擇對戰模式後點擊「開始倒數對戰」；魔王模式下老師可直接在下方鍵盤參戰！</p>
           </div>
         </div>
 
         <!-- 主控按鈕群 -->
         <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-end">
           <button id="btn-add-bot-student" onclick="addSimulatedStudent()" class="px-4 py-3 rounded-xl bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold text-sm shadow-sm transition">
-            ➕ 新增虛擬學生(測試)
+            ➕ 新增虛擬學生
           </button>
           <button id="btn-start-match" onclick="teacherStartMatch()" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-black text-base shadow-lg shadow-orange-500/30 transition flex items-center gap-2">
             <span>🔥 開始倒數對戰</span>
           </button>
           <button id="btn-stop-match" onclick="teacherForceStopMatch()" class="hidden px-6 py-3.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-base shadow-lg shadow-rose-600/25 transition">
-            ⏹️ 強制結束本局
+            ⏹️ 結束本局並結算
           </button>
         </div>
       </div>
 
-      <!-- 老師端：對戰進行中「即時戰況轉播」畫面 -->
+      <!-- 2A. 老師端：對戰進行中「即時戰況轉播」畫面 (1v1 模式) -->
       <div id="teacher-live-arena" class="hidden flex-col gap-6">
         <div class="arena-scoreboard text-white rounded-3xl p-6 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4 border border-indigo-500/40 relative overflow-hidden">
           <div class="flex items-center gap-4 z-10">
@@ -272,8 +288,8 @@
               ⚡
             </div>
             <div>
-              <div class="text-xs font-bold text-sky-300 uppercase tracking-wider">目前對戰模式 (三年級題庫)</div>
-              <div id="live-mode-label" class="text-xl font-black text-white">英文單字 (三年級全小寫)</div>
+              <div class="text-xs font-bold text-sky-300 uppercase tracking-wider">目前對戰模式</div>
+              <div id="live-mode-label" class="text-xl font-black text-white">英文單字對戰 (1v1)</div>
             </div>
           </div>
 
@@ -289,7 +305,6 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <!-- 左側 2/3：各組 1v1 即時拔河戰況卡片 -->
           <div class="lg:col-span-2 flex flex-col gap-4">
             <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
               <span>⚔️ 各組即時拔河戰況</span>
@@ -298,7 +313,6 @@
             <div id="teacher-match-cards" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
           </div>
 
-          <!-- 右側 1/3：即時個人總積分排行榜 -->
           <div class="glass-panel rounded-3xl p-5 border border-indigo-100 shadow-md flex flex-col">
             <h3 class="text-lg font-black text-slate-800 mb-3 flex items-center justify-between">
               <span>🏆 即時積分排行榜</span>
@@ -309,26 +323,163 @@
         </div>
       </div>
 
-      <!-- 老師端：賽前「規則設定、題庫與分組配對」畫面 -->
+      <!-- 2B. 老師端：魔王挑戰賽「2v1 互動打字競技場」(Boss Battle Arena) -->
+      <div id="teacher-boss-arena" class="hidden flex-col gap-5">
+        <!-- 頂部魔王戰況計分板與巨型拔河條 -->
+        <div class="boss-arena-scoreboard rounded-3xl p-5 sm:p-6 border-2 border-amber-400/50 shadow-2xl text-white">
+          <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
+            <!-- 學生雙人聯隊總分 -->
+            <div class="flex items-center gap-3.5">
+              <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-400 to-indigo-600 text-white font-black flex items-center justify-center text-2xl shadow-lg shadow-sky-500/30">
+                🛡️
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-black text-sky-200 text-base sm:text-lg">學生勇者聯隊</span>
+                  <span id="boss-arena-mult-badge" class="px-2 py-0.5 rounded-md bg-sky-500/30 border border-sky-400/50 text-sky-200 text-xs font-black">×2 倍率</span>
+                </div>
+                <div class="text-4xl sm:text-5xl font-mono-code font-black text-sky-400 leading-none mt-1 drop-shadow-[0_0_12px_rgba(56,189,248,0.6)]" id="boss-arena-team-score">0</div>
+                <div id="boss-arena-team-breakdown" class="text-xs text-sky-200/90 font-bold mt-1">
+                  (學生A 0 + 學生B 0) × 2
+                </div>
+              </div>
+            </div>
+
+            <!-- 中央倒數計時 -->
+            <div class="bg-slate-950/85 border border-amber-400/50 px-6 py-2.5 rounded-2xl text-center shadow-inner">
+              <div class="text-[10px] font-extrabold text-amber-300 uppercase tracking-widest">魔王戰剩餘時間</div>
+              <div id="boss-arena-timer" class="text-3xl sm:text-4xl font-mono-code font-black text-amber-400">01:00</div>
+            </div>
+
+            <!-- 大魔王老師分數 -->
+            <div class="flex items-center gap-3.5 text-right">
+              <div>
+                <div class="flex items-center justify-end gap-2">
+                  <span class="px-2 py-0.5 rounded-md bg-amber-500/30 border border-amber-400/50 text-amber-200 text-xs font-black">BOSS</span>
+                  <span id="boss-arena-boss-name" class="font-black text-amber-300 text-base sm:text-lg">大魔王老師</span>
+                </div>
+                <div class="text-4xl sm:text-5xl font-mono-code font-black text-amber-400 leading-none mt-1 drop-shadow-[0_0_12px_rgba(251,191,36,0.6)]" id="boss-arena-boss-score">0</div>
+                <div id="boss-arena-boss-stats" class="text-xs text-amber-200/90 font-bold mt-1">
+                  完成 0 題 ｜ 連擊 0
+                </div>
+              </div>
+              <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-rose-600 text-white font-black flex items-center justify-center text-2xl shadow-lg shadow-amber-500/30">
+                👹
+              </div>
+            </div>
+          </div>
+
+          <!-- 巨型雙色拔河條 -->
+          <div class="relative w-full h-6 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-600 rounded-full overflow-hidden shadow-inner flex items-center border border-white/20">
+            <div id="boss-arena-tug-bar" class="h-full bg-gradient-to-r from-indigo-500 via-sky-400 to-cyan-300 tug-transition tug-glow-blue flex items-center justify-end pr-1.5" style="width: 50%;">
+              <div class="w-4 h-4 rounded-full bg-white shadow-[0_0_10px_#fff]"></div>
+            </div>
+            <div class="absolute inset-y-0 left-1/2 w-0.5 bg-white/80 z-10"></div>
+          </div>
+          <div class="flex justify-between text-xs font-bold mt-2">
+            <span class="text-sky-300">🛡️ 學生聯隊進攻 ➔</span>
+            <span id="boss-arena-status-hint" class="text-amber-300">雙方勢均力敵！</span>
+            <span class="text-rose-300">⬅ 魔王反擊 🔥</span>
+          </div>
+        </div>
+
+        <!-- 老師魔王親自打字輸入區 -->
+        <div id="boss-typing-card" class="boss-keycap-card rounded-3xl p-6 sm:p-8 border-2 border-amber-400 flex flex-col items-center justify-center relative overflow-hidden">
+          <div id="boss-combo-badge" class="hidden absolute top-4 right-4 px-4 py-1.5 rounded-full bg-gradient-to-r from-rose-600 to-amber-500 text-white font-black text-sm shadow-md animate-pop">
+            🔥 魔王 <span id="boss-combo-count">0</span> 連擊！
+          </div>
+
+          <div id="boss-typing-mode-hint" class="px-3.5 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-extrabold tracking-wide mb-4 border border-amber-300">
+            👹 老師請在下方輸入題目，迎戰兩位小勇者！
+          </div>
+
+          <!-- 老師題目顯示 -->
+          <div id="boss-target-word-display" class="text-4xl sm:text-6xl font-black tracking-wider text-center mb-6 select-none leading-snug break-words max-w-full px-6 py-4 rounded-2xl bg-white/95 border-2 border-amber-200 shadow-inner">
+            apple
+          </div>
+
+          <!-- 老師輸入框 -->
+          <div class="w-full max-w-xl">
+            <input id="boss-typing-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+              placeholder="老師請在此打字..."
+              class="w-full px-6 py-4 rounded-2xl border-2 border-amber-400 bg-white focus:border-rose-600 focus:ring-4 focus:ring-amber-200 focus:outline-none text-2xl sm:text-3xl font-bold text-center text-slate-900 shadow-md transition" />
+            <div class="text-center mt-2.5 text-xs text-amber-900/80 font-bold">
+              💡 英文模式自動判斷小寫；中文模式選字後按 Enter 送出！
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2C. 老師端：賽前「規則設定、題庫與分組配對」畫面 -->
       <div id="teacher-setup-area" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        <!-- 左欄 (5/12)：比賽設定與題庫編輯 -->
-        <div class="lg:col-span-5 glass-panel rounded-3xl p-6 border border-indigo-100 shadow-md flex flex-col gap-5">
+        <!-- 左欄 (5/12)：比賽模式、魔王倍率與題庫設定 -->
+        <div class="lg:col-span-5 glass-panel rounded-3xl p-6 border border-indigo-100 shadow-md flex flex-col gap-4">
           <h3 class="text-lg font-black text-slate-800 border-b border-slate-200/70 pb-3 flex items-center justify-between">
-            <span>⚙️ 比賽規則與題庫設定</span>
+            <span>⚙️ 比賽模式與題庫設定</span>
             <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg">國小三年級程度</span>
           </h3>
           
-          <!-- 打字模式選擇 -->
+          <!-- 3 種對戰模式選擇 -->
           <div>
-            <label class="block text-xs font-extrabold text-slate-600 uppercase mb-2">1. 選擇打字模式</label>
-            <div class="grid grid-cols-2 gap-3">
-              <button id="mode-btn-en" onclick="setGameMode('en')" class="py-3 px-4 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-black text-sm transition flex items-center justify-center gap-2 shadow-sm">
-                <span>🔤</span> 英文單字 (全小寫)
+            <label class="block text-xs font-extrabold text-slate-600 uppercase mb-2">1. 選擇對戰模式 (共 3 種)</label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button id="mode-btn-en" onclick="setGameMode('en')" class="py-2.5 px-3 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-black text-xs transition flex flex-col items-center justify-center gap-1 shadow-sm">
+                <span class="text-base">🔤</span>
+                <span>英文單字 (1v1)</span>
               </button>
-              <button id="mode-btn-zh" onclick="setGameMode('zh')" class="py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-black text-sm transition flex items-center justify-center gap-2">
-                <span>🀄</span> 中文詞語 (三年級)
+              <button id="mode-btn-zh" onclick="setGameMode('zh')" class="py-2.5 px-3 rounded-xl border-2 border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-black text-xs transition flex flex-col items-center justify-center gap-1">
+                <span class="text-base">🀄</span>
+                <span>中文詞語 (1v1)</span>
               </button>
+              <button id="mode-btn-boss" onclick="setGameMode('boss')" class="py-2.5 px-3 rounded-xl border-2 border-slate-200 bg-white text-slate-600 hover:bg-amber-50 font-black text-xs transition flex flex-col items-center justify-center gap-1">
+                <span class="text-base">👹</span>
+                <span>跟老師對戰 (2v1)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 魔王挑戰賽專屬設定面板 (僅在 mode === 'boss' 時顯示) -->
+          <div id="boss-settings-panel" class="hidden p-4 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-black text-amber-900 flex items-center gap-1">
+                <span>👑 魔王挑戰賽設定 (兩位學生分數相加 × 倍率)</span>
+              </span>
+            </div>
+
+            <!-- 選擇難度與分數倍率 -->
+            <div>
+              <label class="block text-[11px] font-extrabold text-amber-800 mb-1.5">選擇挑戰難度 (學生聯隊分數加乘)：</label>
+              <div class="grid grid-cols-3 gap-2">
+                <button id="diff-btn-3" onclick="setBossDifficulty(3)" class="py-2 px-2 rounded-xl border-2 border-slate-200 bg-white text-slate-700 font-black text-xs transition text-center">
+                  <div>🌱 簡單</div>
+                  <div class="text-[11px] text-emerald-600">學生總分 ×3</div>
+                </button>
+                <button id="diff-btn-2" onclick="setBossDifficulty(2)" class="py-2 px-2 rounded-xl border-2 border-amber-600 bg-amber-100 text-amber-900 font-black text-xs transition text-center shadow-xs">
+                  <div>⚔️ 一般</div>
+                  <div class="text-[11px] text-amber-700">學生總分 ×2</div>
+                </button>
+                <button id="diff-btn-1" onclick="setBossDifficulty(1)" class="py-2 px-2 rounded-xl border-2 border-slate-200 bg-white text-slate-700 font-black text-xs transition text-center">
+                  <div>🔥 困難</div>
+                  <div class="text-[11px] text-rose-600">學生總分 ×1</div>
+                </button>
+              </div>
+            </div>
+
+            <!-- 魔王題庫語言 & 魔王稱號 -->
+            <div class="grid grid-cols-2 gap-2.5 pt-1">
+              <div>
+                <label class="block text-[11px] font-extrabold text-amber-800 mb-1">魔王戰使用題庫</label>
+                <div class="grid grid-cols-2 gap-1.5">
+                  <button id="boss-lang-en" onclick="setBossLang('en')" class="py-1.5 rounded-lg border-2 border-amber-600 bg-white text-amber-900 font-black text-xs">英文</button>
+                  <button id="boss-lang-zh" onclick="setBossLang('zh')" class="py-1.5 rounded-lg border border-amber-200 bg-white/70 text-slate-600 font-bold text-xs">中文</button>
+                </div>
+              </div>
+              <div>
+                <label class="block text-[11px] font-extrabold text-amber-800 mb-1">老師魔王稱號</label>
+                <input id="input-boss-name" type="text" maxlength="10" value="大魔王老師"
+                  class="w-full px-2.5 py-1.5 rounded-lg border border-amber-300 bg-white text-xs font-black text-slate-800 focus:outline-none focus:border-amber-600" />
+              </div>
             </div>
           </div>
 
@@ -336,45 +487,44 @@
           <div>
             <label class="block text-xs font-extrabold text-slate-600 uppercase mb-2">2. 比賽時間 (秒)</label>
             <div class="grid grid-cols-4 gap-2">
-              <button onclick="setDuration(60)" data-dur="60" class="dur-btn py-2.5 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-black text-sm">60秒</button>
-              <button onclick="setDuration(90)" data-dur="90" class="dur-btn py-2.5 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm">90秒</button>
-              <button onclick="setDuration(120)" data-dur="120" class="dur-btn py-2.5 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm">120秒</button>
-              <input id="custom-duration-input" type="number" min="15" max="600" placeholder="自訂秒數" onchange="setDuration(parseInt(this.value, 10)||60)"
-                class="px-2 py-2 rounded-xl border-2 border-slate-200 bg-white text-center text-sm font-bold focus:border-indigo-500 focus:outline-none" />
+              <button onclick="setDuration(30)" data-dur="30" class="dur-btn py-2 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm">30秒</button>
+              <button onclick="setDuration(60)" data-dur="60" class="dur-btn py-2 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-black text-sm">60秒</button>
+              <button onclick="setDuration(90)" data-dur="90" class="dur-btn py-2 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm">90秒</button>
+              <button onclick="setDuration(120)" data-dur="120" class="dur-btn py-2 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm">120秒</button>
             </div>
           </div>
 
           <!-- 自訂題庫編輯器 -->
           <div class="flex-1 flex flex-col">
-            <div class="flex items-center justify-between mb-2">
-              <label class="text-xs font-extrabold text-slate-600 uppercase">3. 對戰題庫 (每行一題，可自由修改)</label>
-              <button onclick="resetDefaultWordBank()" class="text-xs text-indigo-600 hover:underline font-bold">恢復三年級預設題庫</button>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-xs font-extrabold text-slate-600 uppercase">3. 對戰題庫 (每行一題，可自由增刪)</label>
+              <button onclick="resetDefaultWordBank()" class="text-xs text-indigo-600 hover:underline font-bold">恢復三年級預設</button>
             </div>
-            <textarea id="word-bank-editor" rows="8"
-              class="w-full flex-1 p-3.5 rounded-2xl border-2 border-slate-200 bg-white/95 focus:border-indigo-500 focus:outline-none text-sm font-medium leading-relaxed resize-none"
+            <textarea id="word-bank-editor" rows="6"
+              class="w-full flex-1 p-3 rounded-2xl border-2 border-slate-200 bg-white/95 focus:border-indigo-500 focus:outline-none text-sm font-medium leading-relaxed resize-none"
               placeholder="請輸入題目，每行一個單字或詞語..."></textarea>
-            <div class="flex justify-between items-center mt-2 text-xs text-slate-500 font-medium">
-              <span>英文模式自動轉小寫比對，不限大小寫鍵</span>
+            <div class="flex justify-between items-center mt-1.5 text-xs text-slate-500 font-medium">
+              <span>英文自動轉小寫比對，不限大小寫鍵</span>
               <span id="word-count-label" class="font-bold text-indigo-600">共 0 題</span>
             </div>
           </div>
         </div>
 
-        <!-- 右欄 (7/12)：連線學生與兩兩配對管理 -->
+        <!-- 右欄 (7/12)：連線學生與配對管理 -->
         <div class="lg:col-span-7 glass-panel rounded-3xl p-6 border border-indigo-100 shadow-md flex flex-col gap-5">
           <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/70 pb-3">
             <div>
-              <h3 class="text-lg font-black text-slate-800">👥 學生名單與兩兩配對</h3>
-              <p class="text-xs text-slate-500">點擊自動隨機配對，或使用下拉選單微調；奇數人數自動補入電腦陪練。</p>
+              <h3 id="pairing-section-title" class="text-lg font-black text-slate-800">👥 學生名單與兩兩配對</h3>
+              <p id="pairing-section-desc" class="text-xs text-slate-500">點擊自動隨機配對，或使用下拉選單微調；奇數人數自動補入電腦陪練。</p>
             </div>
             <div class="flex items-center gap-2">
-              <button onclick="autoPairStudents()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-black text-sm shadow-md shadow-indigo-500/20 transition flex items-center gap-1.5">
-                <span>🎲 自動隨機配對 (兩兩對戰)</span>
+              <button id="btn-auto-pair" onclick="autoPairStudents()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-black text-sm shadow-md shadow-indigo-500/20 transition flex items-center gap-1.5">
+                <span>🎲 自動隨機配對</span>
               </button>
             </div>
           </div>
 
-          <!-- 未配對 / 連線學生列表 -->
+          <!-- 目前在線學生列表 -->
           <div>
             <div class="text-xs font-extrabold text-slate-500 uppercase mb-2">目前在線學生 (<span id="lobby-online-count">0</span>)</div>
             <div id="lobby-students-chips" class="flex flex-wrap gap-2 min-h-[46px] p-3 rounded-2xl bg-indigo-50/60 border border-indigo-100">
@@ -382,11 +532,11 @@
             </div>
           </div>
 
-          <!-- 已建立的 1v1 對戰組別 -->
+          <!-- 分組 / 魔王聯隊顯示區 -->
           <div class="flex-1 flex flex-col">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-extrabold text-slate-600 uppercase">對戰分組表 (1 VS 1)</span>
-              <button onclick="addEmptyMatchSlot()" class="text-xs font-bold text-indigo-600 hover:text-indigo-800">+ 手動新增一組</button>
+              <span id="pairing-list-label" class="text-xs font-extrabold text-slate-600 uppercase">對戰分組表 (1 VS 1)</span>
+              <button id="btn-add-slot" onclick="addEmptyMatchSlot()" class="text-xs font-bold text-indigo-600 hover:text-indigo-800">+ 手動新增一組</button>
             </div>
             <div id="teacher-pairings-list" class="space-y-3 overflow-y-auto max-h-[340px] pr-1">
               <div class="text-center py-10 border-2 border-dashed border-indigo-200/80 bg-white/50 rounded-2xl text-slate-400 text-sm">
@@ -415,23 +565,23 @@
           <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-3 mb-1">
             歡迎，<span id="student-lobby-name" class="text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-orange-500">同學</span>！
           </h2>
-          <p class="text-slate-600 text-sm mb-6">已成功連線至老師的教室，請等待老師進行分組與開始比賽。</p>
+          <p class="text-slate-600 text-sm mb-6">已成功連線至老師的教室，請等待老師設定對戰與開始比賽。</p>
 
           <!-- 對戰配對資訊卡 -->
           <div class="bg-gradient-to-br from-slate-50 to-sky-50/70 rounded-2xl p-5 border border-sky-200/80 mb-6 shadow-inner">
-            <div class="text-xs font-extrabold text-sky-700 uppercase tracking-wider mb-3">本局對戰資訊</div>
+            <div id="lobby-matchup-header" class="text-xs font-extrabold text-sky-700 uppercase tracking-wider mb-3">本局對戰資訊</div>
             <div class="flex items-center justify-around gap-2">
               <div class="text-center">
-                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-500 to-indigo-600 text-white font-black flex items-center justify-center mx-auto mb-1.5 text-lg shadow-md">我</div>
-                <div id="lobby-my-name" class="font-black text-slate-800 text-sm truncate max-w-[100px]">我</div>
+                <div id="lobby-left-avatar" class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-500 to-indigo-600 text-white font-black flex items-center justify-center mx-auto mb-1.5 text-lg shadow-md">我</div>
+                <div id="lobby-my-name" class="font-black text-slate-800 text-sm truncate max-w-[115px]">我</div>
               </div>
               <div class="text-2xl font-black text-amber-500 italic">VS</div>
               <div class="text-center">
-                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-rose-600 text-white font-black flex items-center justify-center mx-auto mb-1.5 text-lg shadow-md">敵</div>
-                <div id="lobby-opponent-name" class="font-black text-slate-600 text-sm truncate max-w-[110px]">等待配對中...</div>
+                <div id="lobby-right-avatar" class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-rose-600 text-white font-black flex items-center justify-center mx-auto mb-1.5 text-lg shadow-md">敵</div>
+                <div id="lobby-opponent-name" class="font-black text-slate-600 text-sm truncate max-w-[125px]">等待配對中...</div>
               </div>
             </div>
-            <div class="mt-4 pt-3 border-t border-sky-200/70 flex justify-center gap-4 text-xs font-bold text-slate-600">
+            <div class="mt-4 pt-3 border-t border-sky-200/70 flex flex-wrap justify-center gap-3 text-xs font-bold text-slate-600">
               <span>模式：<strong id="lobby-game-mode" class="text-indigo-600">英文打字</strong></span>
               <span>時間：<strong id="lobby-game-duration" class="text-orange-600">60 秒</strong></span>
             </div>
@@ -444,18 +594,24 @@
         </div>
       </div>
 
-      <!-- 學生即時對戰畫面 (Active Battle View) -->
+      <!-- 學生即時對戰畫面 (Active Battle View - 支援 1v1 與 2v1 魔王戰) -->
       <div id="student-battle-view" class="hidden flex-1 flex flex-col justify-between max-w-4xl w-full mx-auto gap-4 py-2">
         
         <!-- 頂部：深色星空競技場計分板與發光拔河進度條 -->
-        <div class="arena-scoreboard rounded-3xl p-4 sm:p-6 border border-indigo-500/40 shadow-xl text-white">
+        <div id="student-scoreboard-box" class="arena-scoreboard rounded-3xl p-4 sm:p-6 border border-indigo-500/40 shadow-xl text-white">
           <div class="flex items-center justify-between gap-2 mb-3.5">
-            <!-- 我方資訊 -->
+            <!-- 左側：我方資訊 (或學生聯隊總分) -->
             <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-400 to-indigo-600 text-white font-black flex items-center justify-center text-lg shadow-lg shadow-sky-500/30">我</div>
+              <div id="battle-left-avatar" class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-400 to-indigo-600 text-white font-black flex items-center justify-center text-lg shadow-lg shadow-sky-500/30">我</div>
               <div>
-                <div id="battle-my-name" class="font-black text-sky-200 text-sm sm:text-base">我方選手</div>
+                <div class="flex items-center gap-1.5">
+                  <span id="battle-my-name" class="font-black text-sky-200 text-sm sm:text-base">我方選手</span>
+                  <span id="battle-mult-tag" class="hidden px-2 py-0.5 rounded bg-sky-500/30 border border-sky-400/50 text-sky-200 text-[11px] font-black">×2</span>
+                </div>
                 <div class="text-3xl sm:text-4xl font-mono-code font-black text-sky-400 leading-none mt-0.5 drop-shadow-[0_0_10px_rgba(56,189,248,0.5)]" id="battle-my-score">0</div>
+                <div id="battle-team-subtext" class="hidden text-[11px] text-sky-200/90 font-bold mt-1">
+                  我 0 + 隊友 0
+                </div>
               </div>
             </div>
 
@@ -465,13 +621,13 @@
               <div id="battle-timer" class="text-2xl sm:text-3xl font-mono-code font-black text-amber-400">60</div>
             </div>
 
-            <!-- 對手資訊 -->
+            <!-- 右側：對手資訊 (或大魔王老師) -->
             <div class="flex items-center gap-3 text-right">
               <div>
                 <div id="battle-opp-name" class="font-black text-orange-200 text-sm sm:text-base">對手</div>
                 <div class="text-3xl sm:text-4xl font-mono-code font-black text-orange-400 leading-none mt-0.5 drop-shadow-[0_0_10px_rgba(251,146,60,0.5)]" id="battle-opp-score">0</div>
               </div>
-              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-rose-600 text-white font-black flex items-center justify-center text-lg shadow-lg shadow-orange-500/30">敵</div>
+              <div id="battle-right-avatar" class="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-rose-600 text-white font-black flex items-center justify-center text-lg shadow-lg shadow-orange-500/30">敵</div>
             </div>
           </div>
 
@@ -480,13 +636,12 @@
             <div id="battle-tug-bar" class="h-full bg-gradient-to-r from-indigo-500 via-sky-400 to-cyan-300 tug-transition tug-glow-blue flex items-center justify-end pr-1" style="width: 50%;">
               <div class="w-3.5 h-3.5 rounded-full bg-white shadow-[0_0_8px_#fff]"></div>
             </div>
-            <!-- 中線標記 -->
             <div class="absolute inset-y-0 left-1/2 w-0.5 bg-white/70 z-10"></div>
           </div>
           <div class="flex justify-between text-[11px] font-bold text-slate-300 mt-1.5">
-            <span class="text-sky-300">⚡ 我方推進 ➔</span>
+            <span id="battle-left-bar-label" class="text-sky-300">⚡ 我方推進 ➔</span>
             <span id="battle-status-hint" class="text-amber-300">勢均力敵！</span>
-            <span class="text-orange-300">⬅ 對手進攻 🔥</span>
+            <span id="battle-right-bar-label" class="text-orange-300">⬅ 對手進攻 🔥</span>
           </div>
         </div>
 
@@ -522,16 +677,16 @@
         <!-- 底部：個人即時數據列 -->
         <div class="grid grid-cols-3 gap-3 sm:gap-4">
           <div class="glass-panel rounded-2xl p-3.5 border border-sky-200/80 text-center shadow-sm">
-            <div class="text-xs font-bold text-slate-500">打字速度 (<span id="speed-unit-label">WPM</span>)</div>
+            <div class="text-xs font-bold text-slate-500">個人打字速度 (<span id="speed-unit-label">WPM</span>)</div>
             <div id="stat-wpm" class="text-xl sm:text-2xl font-mono-code font-black text-indigo-700 mt-0.5">0</div>
           </div>
           <div class="glass-panel rounded-2xl p-3.5 border border-emerald-200/80 text-center shadow-sm">
-            <div class="text-xs font-bold text-slate-500">正確率</div>
+            <div class="text-xs font-bold text-slate-500">個人正確率</div>
             <div id="stat-accuracy" class="text-xl sm:text-2xl font-mono-code font-black text-emerald-600 mt-0.5">100%</div>
           </div>
           <div class="glass-panel rounded-2xl p-3.5 border border-amber-200/80 text-center shadow-sm">
-            <div class="text-xs font-bold text-slate-500">最高連擊</div>
-            <div id="stat-max-combo" class="text-xl sm:text-2xl font-mono-code font-black text-orange-500 mt-0.5">0</div>
+            <div class="text-xs font-bold text-slate-500">個人原始得分</div>
+            <div id="stat-raw-score" class="text-xl sm:text-2xl font-mono-code font-black text-orange-500 mt-0.5">0</div>
           </div>
         </div>
       </div>
@@ -545,9 +700,9 @@
           <p id="result-subtitle" class="text-slate-600 text-sm mb-6">太精彩了！你的手速無人能敵！</p>
 
           <!-- 雙方分數對比 -->
-          <div class="grid grid-cols-2 gap-4 bg-slate-50/90 p-4 rounded-2xl border border-slate-200 mb-6">
+          <div class="grid grid-cols-2 gap-4 bg-slate-50/90 p-4 rounded-2xl border border-slate-200 mb-4">
             <div class="p-3 rounded-xl bg-sky-50 border border-sky-200">
-              <div class="text-xs font-bold text-sky-700">我的最終得分</div>
+              <div id="res-my-label" class="text-xs font-bold text-sky-700">我的最終得分</div>
               <div id="res-my-score" class="text-3xl font-mono-code font-black text-indigo-900 mt-1">0</div>
             </div>
             <div class="p-3 rounded-xl bg-orange-50 border border-orange-200">
@@ -556,10 +711,15 @@
             </div>
           </div>
 
+          <!-- 魔王戰公式明細 (僅在魔王戰顯示) -->
+          <div id="res-boss-formula-box" class="hidden mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs font-extrabold text-amber-900">
+            聯隊計算公式：(我 0 + 隊友 0) × 2 = 0 分
+          </div>
+
           <!-- 個人詳細表現 -->
           <div class="grid grid-cols-3 gap-2 mb-6 text-center">
             <div class="p-2.5 rounded-xl bg-white border border-slate-200/80">
-              <div class="text-[11px] font-bold text-slate-500">完成題數</div>
+              <div class="text-[11px] font-bold text-slate-500">個人完成題數</div>
               <div id="res-words-done" class="text-lg font-black text-slate-800">0</div>
             </div>
             <div class="p-2.5 rounded-xl bg-white border border-slate-200/80">
@@ -586,29 +746,29 @@
 
   </main>
 
-  <!-- ==================== 老師端：賽後總結與 MVP 頒獎彈窗 ==================== -->
+  <!-- ==================== 老師端：賽後總結與 MVP / 魔王戰頒獎彈窗 ==================== -->
   <div id="teacher-summary-modal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 max-h-[90vh] flex flex-col">
       <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
         <div>
-          <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-black">本局對戰結算</span>
-          <h3 class="text-2xl font-black text-slate-900 mt-1">🎉 全班成績總覽與 MVP 榮譽榜</h3>
+          <span id="summary-badge-label" class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-black">本局對戰結算</span>
+          <h3 id="summary-modal-title" class="text-2xl font-black text-slate-900 mt-1">🎉 全班成績總覽與 MVP 榮譽榜</h3>
         </div>
         <button onclick="closeSummaryModal()" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold">✕</button>
       </div>
 
-      <!-- 全班 MVP 卡片 -->
+      <!-- 榮譽橫幅卡片 -->
       <div id="mvp-banner" class="bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 rounded-2xl p-5 text-white shadow-lg mb-5 flex items-center justify-between">
         <div class="flex items-center gap-4">
-          <div class="text-5xl">👑</div>
+          <div id="mvp-icon" class="text-5xl">👑</div>
           <div>
-            <div class="text-xs font-black uppercase tracking-wider text-amber-100">本局最高分 MVP</div>
+            <div id="mvp-kicker" class="text-xs font-black uppercase tracking-wider text-amber-100">本局最高分 MVP</div>
             <div id="mvp-name" class="text-2xl sm:text-3xl font-black">尚未產生</div>
             <div id="mvp-stats" class="text-xs font-bold text-amber-50 mt-0.5">得分：0 分 | 速度：0 WPM</div>
           </div>
         </div>
         <div class="hidden sm:block text-right">
-          <span class="px-3 py-1.5 rounded-xl bg-white/20 font-black text-sm">全班第一名</span>
+          <span id="mvp-right-tag" class="px-3 py-1.5 rounded-xl bg-white/20 font-black text-sm">全班第一名</span>
         </div>
       </div>
 
@@ -617,9 +777,9 @@
         <table class="w-full text-left border-collapse">
           <thead class="bg-slate-50 text-slate-600 text-xs font-extrabold uppercase sticky top-0">
             <tr>
-              <th class="py-3 px-4">名次</th>
-              <th class="py-3 px-4">學生姓名</th>
-              <th class="py-3 px-4">對戰對手</th>
+              <th class="py-3 px-4">名次 / 身分</th>
+              <th class="py-3 px-4">選手名稱</th>
+              <th class="py-3 px-4">對戰說明</th>
               <th class="py-3 px-4 text-right">最終得分</th>
               <th class="py-3 px-4 text-right">速度</th>
               <th class="py-3 px-4 text-right">正確率</th>
@@ -634,7 +794,7 @@
         <button onclick="rematchSamePairs()" class="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-black text-sm transition">
           🔄 原班人馬再戰一局
         </button>
-        <button onclick="rematchNewPairs()" class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm shadow-md transition">
+        <button id="btn-modal-new-pairs" onclick="rematchNewPairs()" class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm shadow-md transition">
           🎲 重新隨機配對並準備下一局
         </button>
       </div>
@@ -645,8 +805,8 @@
   <div id="custom-confirm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 text-center">
       <div class="text-4xl mb-3">⚠️</div>
-      <h4 id="confirm-modal-title" class="text-lg font-black text-slate-900 mb-2">確定要離開房間嗎？</h4>
-      <p id="confirm-modal-desc" class="text-sm text-slate-500 mb-6">離開後目前的連線與對戰進度將會中斷。</p>
+      <h4 class="text-lg font-black text-slate-900 mb-2">確定要離開房間嗎？</h4>
+      <p class="text-sm text-slate-500 mb-6">離開後目前的連線與對戰進度將會中斷。</p>
       <div class="grid grid-cols-2 gap-3">
         <button onclick="closeConfirmModal(false)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm">取消</button>
         <button onclick="closeConfirmModal(true)" class="py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm">確定離開</button>
@@ -657,12 +817,14 @@
   <script>
     /**
      * =========================================================================
-     * 班級即時打字對戰系統 - 完整穩定版核心邏輯
-     * 支援雙 CDN 非同步載入 PeerJS、Web Audio API 音效、國小三年級中/英文題庫
+     * 打字王爭霸戰 — 三年級趣味打字對決 (完整單檔核心邏輯)
+     * 支援：
+     * 1. 英文單字對戰 (1v1 互打，自動小寫容錯)
+     * 2. 中文詞語對戰 (1v1 互打，完整 IME 注音組字防誤判)
+     * 3. 魔王挑戰賽 (2v1 雙人聯手 VS 老師，支援 簡單×3 / 一般×2 / 困難×1 倍率)
      * =========================================================================
      */
 
-    // 全域錯誤監聽，避免白畫面且方便診斷
     window.onerror = function (msg, url, lineNo) {
       const banner = document.getElementById('global-error-banner');
       if (banner) {
@@ -672,7 +834,7 @@
       return false;
     };
 
-    // 非同步載入 PeerJS (含雙 CDN 備援，不阻塞畫面渲染)
+    // 非同步雙 CDN 載入 PeerJS
     let peerJsPromise = null;
     function ensurePeerJsLoaded() {
       if (typeof window.Peer !== 'undefined') {
@@ -690,22 +852,17 @@
         function tryLoadNext() {
           if (index >= cdns.length) {
             peerJsPromise = null;
-            reject(new Error('無法載入即時連線元件，請檢查網路連線或使用「單機模擬測試」。'));
+            reject(new Error('無法載入即時連線元件，請檢查網路或使用單機體驗模式。'));
             return;
           }
           const script = document.createElement('script');
           script.src = cdns[index++];
           script.async = true;
           script.onload = () => {
-            if (typeof window.Peer !== 'undefined') {
-              resolve(window.Peer);
-            } else {
-              tryLoadNext();
-            }
+            if (typeof window.Peer !== 'undefined') resolve(window.Peer);
+            else tryLoadNext();
           };
-          script.onerror = () => {
-            tryLoadNext();
-          };
+          script.onerror = () => tryLoadNext();
           document.head.appendChild(script);
         }
         tryLoadNext();
@@ -714,7 +871,7 @@
       return peerJsPromise;
     }
 
-    // 國小三年級適齡題庫 (英文全小寫基礎單字、中文常見詞語與簡單成語)
+    // 國小三年級適齡預設題庫
     const DEFAULT_BANKS = {
       en: [
         "apple", "book", "cat", "dog", "fish", "milk", "blue", "red", "sun", "star",
@@ -730,22 +887,39 @@
       ]
     };
 
-    // 全域狀態管理
+    // 全域狀態
     const state = {
       role: null, // 'teacher' | 'student' | 'solo'
       soundEnabled: true,
       peer: null,
       roomCode: '',
       teacher: {
-        mode: 'en',
+        mode: 'en', // 'en' | 'zh' | 'boss'
+        bossLang: 'en', // 'en' | 'zh' (魔王模式下的題庫語言)
+        bossMultiplier: 2, // 3 (簡單×3), 2 (一般×2), 1 (困難×1)
+        bossName: '大魔王老師',
         duration: 60,
         wordBank: [...DEFAULT_BANKS.en],
         students: {}, // id -> { id, name, conn, isBot, score, wordsDone, wpm, accuracy, combo, maxCombo }
-        pairings: [], // [{ id, p1Id, p2Id }]
+        pairings: [], // 1v1 模式使用: [{ id, p1Id, p2Id }]
+        bossDuoIds: ['', ''], // 2v1 魔王模式下的兩位聯隊學生 ID
         isPlaying: false,
         timeLeft: 60,
         timerInterval: null,
-        botInterval: null
+        botInterval: null,
+        bossSyncInterval: null,
+        // 老師親自扮演大魔王的打字狀態
+        bossStats: {
+          wordList: [],
+          currentIndex: 0,
+          score: 0,
+          wordsDone: 0,
+          combo: 0,
+          maxCombo: 0,
+          totalKeystrokes: 0,
+          correctChars: 0,
+          isComposing: false
+        }
       },
       student: {
         myId: '',
@@ -753,12 +927,16 @@
         conn: null,
         matchId: '',
         opponentName: '等待配對中...',
-        mode: 'en',
+        teammateName: '',
+        isBossMode: false,
+        bossMultiplier: 1,
+        mode: 'en', // 實際題庫語言 'en' | 'zh'
         duration: 60,
         wordList: [...DEFAULT_BANKS.en],
         currentIndex: 0,
-        score: 0,
-        oppScore: 0,
+        score: 0, // 個人原始得分
+        teammateScore: 0, // 隊友原始得分 (魔王模式)
+        oppScore: 0, // 對手得分 (或魔王老師得分)
         combo: 0,
         maxCombo: 0,
         wordsDone: 0,
@@ -827,9 +1005,7 @@
           osc.start(now);
           osc.stop(now + 0.3);
         }
-      } catch (e) {
-        // 忽略瀏覽器音訊限制錯誤
-      }
+      } catch (e) {}
     }
 
     function toggleSound() {
@@ -898,6 +1074,7 @@
     function cleanupAllSessions() {
       clearInterval(state.teacher.timerInterval);
       clearInterval(state.teacher.botInterval);
+      clearInterval(state.teacher.bossSyncInterval);
       clearInterval(state.student.timerInterval);
       clearInterval(state.student.soloBotInterval);
       if (state.peer) {
@@ -906,8 +1083,8 @@
       }
       state.role = null;
       state.teacher.students = {};
-      state.teacher.pairings = {};
       state.teacher.pairings = [];
+      state.teacher.bossDuoIds = ['', ''];
       state.teacher.isPlaying = false;
       state.student.isPlaying = false;
     }
@@ -942,13 +1119,33 @@
       document.body.removeChild(temp);
     }
 
+    function getEffectiveWordLang() {
+      return state.teacher.mode === 'boss' ? state.teacher.bossLang : state.teacher.mode;
+    }
+
     // ==================== 老師端邏輯 (Teacher Host) ====================
-    async function initTeacherRole() {
+    async function initTeacherRole(isBossDemo = false) {
       state.role = 'teacher';
       switchMainView('view-teacher');
-      resetDefaultWordBank();
+      if (isBossDemo) {
+        setGameMode('boss');
+        setBossDifficulty(2);
+      } else {
+        setGameMode('en');
+      }
       renderTeacherStudentsAndPairings();
       setConnectionStatus('connecting', '正在建立房間...');
+
+      if (isBossDemo) {
+        state.roomCode = '8888';
+        document.getElementById('teacher-room-code').textContent = '8888';
+        setConnectionStatus('online', '單機魔王體驗模式');
+        addSimulatedStudent('01 小宇');
+        addSimulatedStudent('02 晴晴');
+        autoPairStudents();
+        showToast('已自動建立兩位虛擬勇者學生，點擊「開始倒數對戰」即可親自當魔王！', 'success');
+        return;
+      }
 
       try {
         const PeerClass = await ensurePeerJsLoaded();
@@ -959,6 +1156,11 @@
         document.getElementById('teacher-room-code').textContent = state.roomCode;
         showToast('目前為離線環境，可使用「新增虛擬學生」進行演示', 'warning');
       }
+    }
+
+    function startTeacherBossDemoMode() {
+      cleanupAllSessions();
+      initTeacherRole(true);
     }
 
     function createTeacherPeerRoom(PeerClass) {
@@ -988,7 +1190,7 @@
             createTeacherPeerRoom(PeerClass);
           } else {
             setConnectionStatus('error', '連線異常');
-            showToast('P2P 連線發生異常，可使用虛擬學生測試', 'warning');
+            showToast('P2P 連線異常，可使用虛擬學生測試', 'warning');
           }
         });
       } catch (e) {
@@ -1014,6 +1216,11 @@
           combo: 0,
           maxCombo: 0
         };
+        // 若在魔王模式且聯隊尚有空位，自動填入聯隊
+        if (state.teacher.mode === 'boss') {
+          if (!state.teacher.bossDuoIds[0]) state.teacher.bossDuoIds[0] = sid;
+          else if (!state.teacher.bossDuoIds[1] && state.teacher.bossDuoIds[0] !== sid) state.teacher.bossDuoIds[1] = sid;
+        }
         showToast(`🎉 ${cleanName} 加入了教室！`, 'success');
         renderTeacherStudentsAndPairings();
         syncLobbyInfoToAllStudents();
@@ -1027,15 +1234,19 @@
           st.combo = data.combo || 0;
           st.maxCombo = Math.max(st.maxCombo, st.combo);
 
-          // 同步最新分數給該生的對戰對手
-          const opponent = getOpponentOfStudent(st.id);
-          if (opponent && opponent.conn && opponent.conn.open) {
-            opponent.conn.send({
-              type: 'opponent_score',
-              oppScore: st.score
-            });
+          if (state.teacher.mode === 'boss') {
+            updateBossArenaScoreUI();
+            broadcastBossStateToStudents();
+          } else {
+            const opponent = getOpponentOfStudent(st.id);
+            if (opponent && opponent.conn && opponent.conn.open) {
+              opponent.conn.send({
+                type: 'opponent_score',
+                oppScore: st.score
+              });
+            }
+            updateTeacherLiveArenaUI();
           }
-          updateTeacherLiveArenaUI();
         }
       }
     }
@@ -1045,6 +1256,8 @@
       if (st) {
         showToast(`${st.name} 已離開房間`, 'warning');
         delete state.teacher.students[sid];
+        if (state.teacher.bossDuoIds[0] === sid) state.teacher.bossDuoIds[0] = '';
+        if (state.teacher.bossDuoIds[1] === sid) state.teacher.bossDuoIds[1] = '';
         renderTeacherStudentsAndPairings();
       }
     }
@@ -1053,12 +1266,76 @@
       state.teacher.mode = mode;
       const btnEn = document.getElementById('mode-btn-en');
       const btnZh = document.getElementById('mode-btn-zh');
+      const btnBoss = document.getElementById('mode-btn-boss');
+      const bossPanel = document.getElementById('boss-settings-panel');
+
+      const baseClass = 'py-2.5 px-3 rounded-xl border-2 border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-black text-xs transition flex flex-col items-center justify-center gap-1';
+      btnEn.className = baseClass;
+      btnZh.className = baseClass;
+      btnBoss.className = baseClass;
+
       if (mode === 'en') {
-        btnEn.className = 'py-3 px-4 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-black text-sm transition flex items-center justify-center gap-2 shadow-sm';
-        btnZh.className = 'py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-black text-sm transition flex items-center justify-center gap-2';
+        btnEn.className = 'py-2.5 px-3 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-black text-xs transition flex flex-col items-center justify-center gap-1 shadow-sm';
+        bossPanel.classList.add('hidden');
+      } else if (mode === 'zh') {
+        btnZh.className = 'py-2.5 px-3 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-black text-xs transition flex flex-col items-center justify-center gap-1 shadow-sm';
+        bossPanel.classList.add('hidden');
+      } else if (mode === 'boss') {
+        btnBoss.className = 'py-2.5 px-3 rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-900 font-black text-xs transition flex flex-col items-center justify-center gap-1 shadow-sm';
+        bossPanel.classList.remove('hidden');
+      }
+
+      // 切換右側配對 UI 標題與按鈕
+      const isBoss = mode === 'boss';
+      document.getElementById('pairing-section-title').textContent = isBoss
+        ? '🛡️ 勇者聯隊編組 (兩位學生聯手 VS 老師)'
+        : '👥 學生名單與兩兩配對';
+      document.getElementById('pairing-section-desc').textContent = isBoss
+        ? `兩位學生的分數相加後乘以 ×${state.teacher.bossMultiplier}，共同挑戰大魔王老師！`
+        : '點擊自動隨機配對，或使用下拉選單微調；奇數人數自動補入電腦陪練。';
+      document.getElementById('btn-auto-pair').innerHTML = isBoss
+        ? '<span>🎲 自動選出兩位勇者</span>'
+        : '<span>🎲 自動隨機配對</span>';
+      document.getElementById('pairing-list-label').textContent = isBoss
+        ? `聯隊陣容：(學生1 + 學生2) × ${state.teacher.bossMultiplier} VS 老師`
+        : '對戰分組表 (1 VS 1)';
+      document.getElementById('btn-add-slot').classList.toggle('hidden', isBoss);
+
+      resetDefaultWordBank();
+      renderTeacherStudentsAndPairings();
+      syncLobbyInfoToAllStudents();
+    }
+
+    function setBossDifficulty(mult) {
+      state.teacher.bossMultiplier = mult;
+      [3, 2, 1].forEach(m => {
+        const btn = document.getElementById(`diff-btn-${m}`);
+        if (m === mult) {
+          btn.className = 'py-2 px-2 rounded-xl border-2 border-amber-600 bg-amber-100 text-amber-900 font-black text-xs transition text-center shadow-xs';
+        } else {
+          btn.className = 'py-2 px-2 rounded-xl border-2 border-slate-200 bg-white text-slate-700 font-black text-xs transition text-center';
+        }
+      });
+      if (state.teacher.mode === 'boss') {
+        document.getElementById('pairing-section-desc').textContent =
+          `兩位學生的分數相加後乘以 ×${mult}，共同挑戰大魔王老師！`;
+        document.getElementById('pairing-list-label').textContent =
+          `聯隊陣容：(學生1 + 學生2) × ${mult} VS 老師`;
+        renderTeacherStudentsAndPairings();
+        syncLobbyInfoToAllStudents();
+      }
+    }
+
+    function setBossLang(lang) {
+      state.teacher.bossLang = lang;
+      const btnEn = document.getElementById('boss-lang-en');
+      const btnZh = document.getElementById('boss-lang-zh');
+      if (lang === 'en') {
+        btnEn.className = 'py-1.5 rounded-lg border-2 border-amber-600 bg-white text-amber-900 font-black text-xs';
+        btnZh.className = 'py-1.5 rounded-lg border border-amber-200 bg-white/70 text-slate-600 font-bold text-xs';
       } else {
-        btnZh.className = 'py-3 px-4 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-black text-sm transition flex items-center justify-center gap-2 shadow-sm';
-        btnEn.className = 'py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-black text-sm transition flex items-center justify-center gap-2';
+        btnZh.className = 'py-1.5 rounded-lg border-2 border-amber-600 bg-white text-amber-900 font-black text-xs';
+        btnEn.className = 'py-1.5 rounded-lg border border-amber-200 bg-white/70 text-slate-600 font-bold text-xs';
       }
       resetDefaultWordBank();
       syncLobbyInfoToAllStudents();
@@ -1070,39 +1347,40 @@
       document.querySelectorAll('.dur-btn').forEach(btn => {
         const d = parseInt(btn.getAttribute('data-dur'), 10);
         if (d === validSec) {
-          btn.className = 'dur-btn py-2.5 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-black text-sm';
+          btn.className = 'dur-btn py-2 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-black text-sm';
         } else {
-          btn.className = 'dur-btn py-2.5 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm';
+          btn.className = 'dur-btn py-2 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm';
         }
       });
       syncLobbyInfoToAllStudents();
     }
 
     function resetDefaultWordBank() {
-      const list = DEFAULT_BANKS[state.teacher.mode];
+      const lang = getEffectiveWordLang();
+      const list = DEFAULT_BANKS[lang];
       const editor = document.getElementById('word-bank-editor');
       editor.value = list.join('\n');
       updateWordBankFromEditor();
     }
 
     function updateWordBankFromEditor() {
+      const lang = getEffectiveWordLang();
       const raw = document.getElementById('word-bank-editor').value;
       const lines = raw
         .split('\n')
-        .map(l => state.teacher.mode === 'en' ? l.trim().toLowerCase() : l.trim())
+        .map(l => lang === 'en' ? l.trim().toLowerCase() : l.trim())
         .filter(l => l.length > 0);
-      state.teacher.wordBank = lines.length > 0 ? lines : [...DEFAULT_BANKS[state.teacher.mode]];
+      state.teacher.wordBank = lines.length > 0 ? lines : [...DEFAULT_BANKS[lang]];
       document.getElementById('word-count-label').textContent = `共 ${state.teacher.wordBank.length} 題`;
     }
 
     document.getElementById('word-bank-editor').addEventListener('input', updateWordBankFromEditor);
 
-    // 新增虛擬學生方便老師單機演示或湊偶數
     const BOT_NAMES = ['🤖 機器人小智', '🤖 機器人小美', '🤖 機器人阿寶', '🤖 機器人琪琪', '🤖 機器人皮卡', '🤖 機器人多啦'];
-    function addSimulatedStudent() {
+    function addSimulatedStudent(customName) {
       const existingCount = Object.keys(state.teacher.students).length;
       const botId = `bot-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-      const botName = BOT_NAMES[existingCount % BOT_NAMES.length] + ` #${existingCount + 1}`;
+      const botName = customName || (BOT_NAMES[existingCount % BOT_NAMES.length] + ` #${existingCount + 1}`);
       state.teacher.students[botId] = {
         id: botId,
         name: botName,
@@ -1115,22 +1393,56 @@
         combo: 0,
         maxCombo: 0
       };
+      if (state.teacher.mode === 'boss') {
+        if (!state.teacher.bossDuoIds[0]) state.teacher.bossDuoIds[0] = botId;
+        else if (!state.teacher.bossDuoIds[1] && state.teacher.bossDuoIds[0] !== botId) state.teacher.bossDuoIds[1] = botId;
+      }
       renderTeacherStudentsAndPairings();
-      showToast(`已新增 ${botName}`, 'info');
+      if (!customName) showToast(`已新增 ${botName}`, 'info');
     }
 
-    // 自動兩兩隨機配對
     function autoPairStudents() {
       const realStudents = Object.values(state.teacher.students).filter(s => !s.isBot);
       const existingBots = Object.values(state.teacher.students).filter(s => s.isBot);
       let pool = [...realStudents, ...existingBots];
 
+      if (state.teacher.mode === 'boss') {
+        // 魔王模式需要 2 位學生組成聯隊
+        while (pool.length < 2) {
+          const botId = `bot-duo-${Date.now()}-${pool.length}`;
+          const botObj = {
+            id: botId,
+            name: `🤖 電腦小勇者 #${pool.length + 1}`,
+            conn: null,
+            isBot: true,
+            score: 0,
+            wordsDone: 0,
+            wpm: 0,
+            accuracy: 100,
+            combo: 0,
+            maxCombo: 0
+          };
+          state.teacher.students[botId] = botObj;
+          pool.push(botObj);
+        }
+        // 隨機洗牌取前兩位
+        for (let i = pool.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [pool[i], pool[j]] = [pool[j], pool[i]];
+        }
+        state.teacher.bossDuoIds = [pool[0].id, pool[1].id];
+        renderTeacherStudentsAndPairings();
+        syncLobbyInfoToAllStudents();
+        showToast(`已選出勇者聯隊：${pool[0].name} & ${pool[1].name}！`, 'success');
+        return;
+      }
+
+      // 1v1 模式自動配對
       if (pool.length === 0) {
         showToast('目前尚無學生加入，請先等待學生加入或新增虛擬學生！', 'warning');
         return;
       }
 
-      // 若為奇數人，自動補一位電腦陪練員
       if (pool.length % 2 === 1) {
         const botId = `bot-auto-${Date.now()}`;
         const botObj = {
@@ -1149,7 +1461,6 @@
         pool.push(botObj);
       }
 
-      // 洗牌隨機分組
       for (let i = pool.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [pool[i], pool[j]] = [pool[j], pool[i]];
@@ -1167,6 +1478,12 @@
       renderTeacherStudentsAndPairings();
       syncLobbyInfoToAllStudents();
       showToast(`已完成 ${newPairings.length} 組兩兩配對！`, 'success');
+    }
+
+    function updateBossDuoSlot(slotIdx, studentId) {
+      state.teacher.bossDuoIds[slotIdx] = studentId;
+      renderTeacherStudentsAndPairings();
+      syncLobbyInfoToAllStudents();
     }
 
     function addEmptyMatchSlot() {
@@ -1197,7 +1514,6 @@
       document.getElementById('teacher-student-count').textContent = studentsArr.length;
       document.getElementById('lobby-online-count').textContent = studentsArr.length;
 
-      // 渲染在線學生標籤
       const chipsEl = document.getElementById('lobby-students-chips');
       if (studentsArr.length === 0) {
         chipsEl.innerHTML = '<span class="text-xs text-slate-400 italic self-center">尚無學生連線，請學生輸入房號加入...</span>';
@@ -1210,8 +1526,52 @@
         `).join('');
       }
 
-      // 渲染配對列表
       const listEl = document.getElementById('teacher-pairings-list');
+      const buildOptions = (selectedId) => {
+        let opts = '<option value="">-- 選擇學生 --</option>';
+        studentsArr.forEach(s => {
+          const sel = s.id === selectedId ? 'selected' : '';
+          opts += `<option value="${escapeHtml(s.id)}" ${sel}>${escapeHtml(s.name)}</option>`;
+        });
+        return opts;
+      };
+
+      // 魔王模式 2v1 編組介面
+      if (state.teacher.mode === 'boss') {
+        const bossTitle = document.getElementById('input-boss-name').value.trim() || '大魔王老師';
+        const mult = state.teacher.bossMultiplier;
+        const diffText = mult === 3 ? '簡單 (×3)' : mult === 2 ? '一般 (×2)' : '困難 (×1)';
+
+        listEl.innerHTML = `
+          <div class="p-4 rounded-2xl bg-gradient-to-br from-sky-50 via-white to-amber-50 border-2 border-amber-300 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-1 rounded-lg bg-sky-600 text-white font-black text-xs">🛡️ 學生勇者聯隊 (2 人)</span>
+              <span class="px-2.5 py-1 rounded-lg bg-amber-500 text-white font-black text-xs">難度：${diffText}</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-[11px] font-extrabold text-sky-800 mb-1">勇者 1 號位</label>
+                <select onchange="updateBossDuoSlot(0, this.value)" class="w-full px-3 py-2.5 rounded-xl border-2 border-sky-200 bg-white text-sm font-bold text-slate-800 focus:outline-none">
+                  ${buildOptions(state.teacher.bossDuoIds[0])}
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-extrabold text-sky-800 mb-1">勇者 2 號位</label>
+                <select onchange="updateBossDuoSlot(1, this.value)" class="w-full px-3 py-2.5 rounded-xl border-2 border-sky-200 bg-white text-sm font-bold text-slate-800 focus:outline-none">
+                  ${buildOptions(state.teacher.bossDuoIds[1])}
+                </select>
+              </div>
+            </div>
+            <div class="pt-2 border-t border-amber-200/80 flex items-center justify-between text-xs font-extrabold">
+              <span class="text-sky-800">計分公式：(勇者1 + 勇者2) × ${mult}</span>
+              <span class="text-rose-600">VS 👹 ${escapeHtml(bossTitle)}</span>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // 1v1 模式配對列表
       if (state.teacher.pairings.length === 0) {
         listEl.innerHTML = `
           <div class="text-center py-10 border-2 border-dashed border-indigo-200/80 bg-white/50 rounded-2xl text-slate-400 text-sm">
@@ -1219,15 +1579,6 @@
           </div>`;
         return;
       }
-
-      const buildOptions = (selectedId) => {
-        let opts = '<option value="">-- 選擇選手 --</option>';
-        studentsArr.forEach(s => {
-          const sel = s.id === selectedId ? 'selected' : '';
-          opts += `<option value="${escapeHtml(s.id)}" ${sel}>${escapeHtml(s.name)}</option>`;
-        });
-        return opts;
-      };
 
       listEl.innerHTML = state.teacher.pairings.map((pair, idx) => `
         <div class="flex items-center gap-2 p-3 rounded-2xl bg-white border border-indigo-100 shadow-sm">
@@ -1253,33 +1604,67 @@
     }
 
     function syncLobbyInfoToAllStudents() {
+      const isBoss = state.teacher.mode === 'boss';
+      const effectiveLang = getEffectiveWordLang();
+      const bossName = document.getElementById('input-boss-name').value.trim() || '大魔王老師';
+
       Object.values(state.teacher.students).forEach(st => {
         if (st.conn && st.conn.open) {
-          const opp = getOpponentOfStudent(st.id);
-          st.conn.send({
-            type: 'lobby_update',
-            mode: state.teacher.mode,
-            duration: state.teacher.duration,
-            opponentName: opp ? opp.name : '等待老師配對中...'
-          });
+          if (isBoss) {
+            const s1 = state.teacher.students[state.teacher.bossDuoIds[0]];
+            const s2 = state.teacher.students[state.teacher.bossDuoIds[1]];
+            let teammateName = '等待編組中...';
+            if (s1 && s1.id === st.id) teammateName = s2 ? s2.name : '單人挑戰';
+            else if (s2 && s2.id === st.id) teammateName = s1 ? s1.name : '單人挑戰';
+
+            st.conn.send({
+              type: 'lobby_update',
+              isBossMode: true,
+              bossMultiplier: state.teacher.bossMultiplier,
+              mode: effectiveLang,
+              duration: state.teacher.duration,
+              opponentName: `👹 ${bossName}`,
+              teammateName: teammateName
+            });
+          } else {
+            const opp = getOpponentOfStudent(st.id);
+            st.conn.send({
+              type: 'lobby_update',
+              isBossMode: false,
+              bossMultiplier: 1,
+              mode: effectiveLang,
+              duration: state.teacher.duration,
+              opponentName: opp ? opp.name : '等待老師配對中...',
+              teammateName: ''
+            });
+          }
         }
       });
     }
 
-    // 老師端開始對戰
+    // 老師端開始對戰 (分支處理 1v1 與 2v1 魔王模式)
     function teacherStartMatch() {
-      if (state.teacher.pairings.length === 0) {
-        if (Object.keys(state.teacher.students).length > 0) {
+      const isBoss = state.teacher.mode === 'boss';
+      state.teacher.bossName = document.getElementById('input-boss-name').value.trim() || '大魔王老師';
+
+      if (isBoss) {
+        if (!state.teacher.bossDuoIds[0] && !state.teacher.bossDuoIds[1]) {
           autoPairStudents();
-        } else {
-          showToast('請先等待學生加入，或點擊「新增虛擬學生」測試！', 'warning');
-          return;
+        }
+      } else {
+        if (state.teacher.pairings.length === 0) {
+          if (Object.keys(state.teacher.students).length > 0) {
+            autoPairStudents();
+          } else {
+            showToast('請先等待學生加入，或點擊「新增虛擬學生」測試！', 'warning');
+            return;
+          }
         }
       }
 
       updateWordBankFromEditor();
-      // 產生打亂順序的題庫
       const shuffledBank = [...state.teacher.wordBank].sort(() => Math.random() - 0.5);
+      const effectiveLang = getEffectiveWordLang();
 
       // 重置所有學生分數
       Object.values(state.teacher.students).forEach(s => {
@@ -1291,72 +1676,313 @@
         s.maxCombo = 0;
       });
 
-      // 廣播開始指令給所有連線學生
-      state.teacher.pairings.forEach((pair, idx) => {
-        const p1 = state.teacher.students[pair.p1Id];
-        const p2 = state.teacher.students[pair.p2Id];
-        if (p1 && p1.conn && p1.conn.open) {
-          p1.conn.send({
-            type: 'start_match',
-            matchId: pair.id || `m-${idx}`,
-            opponentName: p2 ? p2.name : '自主挑戰模式',
-            mode: state.teacher.mode,
-            duration: state.teacher.duration,
-            wordList: shuffledBank
-          });
-        }
-        if (p2 && p2.conn && p2.conn.open) {
-          p2.conn.send({
-            type: 'start_match',
-            matchId: pair.id || `m-${idx}`,
-            opponentName: p1 ? p1.name : '自主挑戰模式',
-            mode: state.teacher.mode,
-            duration: state.teacher.duration,
-            wordList: shuffledBank
-          });
-        }
-      });
-
-      // 切換老師端為即時戰況轉播畫面
+      // 隱藏設定區與上方控制鈕
       document.getElementById('teacher-setup-area').classList.add('hidden');
-      document.getElementById('teacher-live-arena').classList.remove('hidden');
-      document.getElementById('teacher-live-arena').classList.add('flex');
       document.getElementById('btn-start-match').classList.add('hidden');
       document.getElementById('btn-add-bot-student').classList.add('hidden');
       document.getElementById('btn-stop-match').classList.remove('hidden');
-      document.getElementById('teacher-status-pill').textContent = '🔥 對戰進行中';
-      document.getElementById('teacher-status-pill').className = 'px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-extrabold border border-rose-200 animate-pulse';
-
-      document.getElementById('live-mode-label').textContent =
-        state.teacher.mode === 'en' ? '英文單字 (三年級全小寫)' : '中文詞語 (三年級適齡)';
-      document.getElementById('live-match-count').textContent = `${state.teacher.pairings.length} 組`;
 
       state.teacher.timeLeft = state.teacher.duration;
-      document.getElementById('teacher-timer-display').textContent = formatSeconds(state.teacher.timeLeft);
-      updateTeacherLiveArenaUI();
 
-      // 啟動 3-2-1 同步倒數
-      runCountdownOverlay(() => {
-        state.teacher.isPlaying = true;
-        startTeacherTimers();
+      if (isBoss) {
+        // 準備魔王模式
+        const s1 = state.teacher.students[state.teacher.bossDuoIds[0]];
+        const s2 = state.teacher.students[state.teacher.bossDuoIds[1]];
+
+        [s1, s2].forEach((player, idx) => {
+          const mate = idx === 0 ? s2 : s1;
+          if (player && player.conn && player.conn.open) {
+            player.conn.send({
+              type: 'start_match',
+              isBossMode: true,
+              bossMultiplier: state.teacher.bossMultiplier,
+              opponentName: `👹 ${state.teacher.bossName}`,
+              teammateName: mate ? mate.name : '無隊友',
+              mode: effectiveLang,
+              duration: state.teacher.duration,
+              wordList: shuffledBank
+            });
+          }
+        });
+
+        // 初始化老師魔王打字競技場
+        prepareTeacherBossArena(shuffledBank, effectiveLang);
+        document.getElementById('teacher-boss-arena').classList.remove('hidden');
+        document.getElementById('teacher-boss-arena').classList.add('flex');
+        document.getElementById('teacher-status-pill').textContent = '👹 魔王挑戰賽進行中';
+        document.getElementById('teacher-status-pill').className = 'px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-extrabold border border-amber-300 animate-pulse';
+
+        runCountdownOverlay(() => {
+          state.teacher.isPlaying = true;
+          const bossInput = document.getElementById('boss-typing-input');
+          bossInput.disabled = false;
+          bossInput.focus();
+          startTeacherTimers();
+        });
+      } else {
+        // 準備 1v1 模式
+        state.teacher.pairings.forEach((pair, idx) => {
+          const p1 = state.teacher.students[pair.p1Id];
+          const p2 = state.teacher.students[pair.p2Id];
+          if (p1 && p1.conn && p1.conn.open) {
+            p1.conn.send({
+              type: 'start_match',
+              isBossMode: false,
+              bossMultiplier: 1,
+              matchId: pair.id || `m-${idx}`,
+              opponentName: p2 ? p2.name : '自主挑戰模式',
+              teammateName: '',
+              mode: effectiveLang,
+              duration: state.teacher.duration,
+              wordList: shuffledBank
+            });
+          }
+          if (p2 && p2.conn && p2.conn.open) {
+            p2.conn.send({
+              type: 'start_match',
+              isBossMode: false,
+              bossMultiplier: 1,
+              matchId: pair.id || `m-${idx}`,
+              opponentName: p1 ? p1.name : '自主挑戰模式',
+              teammateName: '',
+              mode: effectiveLang,
+              duration: state.teacher.duration,
+              wordList: shuffledBank
+            });
+          }
+        });
+
+        document.getElementById('teacher-live-arena').classList.remove('hidden');
+        document.getElementById('teacher-live-arena').classList.add('flex');
+        document.getElementById('teacher-status-pill').textContent = '🔥 對戰進行中';
+        document.getElementById('teacher-status-pill').className = 'px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-extrabold border border-rose-200 animate-pulse';
+
+        document.getElementById('live-mode-label').textContent =
+          effectiveLang === 'en' ? '英文單字對戰 (三年級全小寫)' : '中文詞語對戰 (三年級適齡)';
+        document.getElementById('live-match-count').textContent = `${state.teacher.pairings.length} 組`;
+        document.getElementById('teacher-timer-display').textContent = formatSeconds(state.teacher.timeLeft);
+        updateTeacherLiveArenaUI();
+
+        runCountdownOverlay(() => {
+          state.teacher.isPlaying = true;
+          startTeacherTimers();
+        });
+      }
+    }
+
+    // ==================== 老師魔王競技場打字與計分邏輯 ====================
+    function prepareTeacherBossArena(shuffledBank, lang) {
+      const bs = state.teacher.bossStats;
+      bs.wordList = [...shuffledBank].reverse(); // 題庫順序微調避免完全重複
+      bs.currentIndex = 0;
+      bs.score = 0;
+      bs.wordsDone = 0;
+      bs.combo = 0;
+      bs.maxCombo = 0;
+      bs.totalKeystrokes = 0;
+      bs.correctChars = 0;
+      bs.isComposing = false;
+
+      const mult = state.teacher.bossMultiplier;
+      document.getElementById('boss-arena-mult-badge').textContent = `×${mult} 倍率`;
+      document.getElementById('boss-arena-boss-name').textContent = state.teacher.bossName;
+      document.getElementById('boss-arena-timer').textContent = formatSeconds(state.teacher.timeLeft);
+      document.getElementById('boss-combo-badge').classList.add('hidden');
+      document.getElementById('boss-typing-mode-hint').textContent = lang === 'en'
+        ? '👹 魔王出擊！請輸入下方英文單字 (大小寫皆可自動判定)'
+        : '👹 魔王出擊！請輸入下方中文詞語 (選字後按 Enter 送出)';
+
+      updateBossArenaScoreUI();
+      renderBossTargetWord('');
+      const bossInput = document.getElementById('boss-typing-input');
+      bossInput.value = '';
+      bossInput.disabled = true;
+    }
+
+    function renderBossTargetWord(typedValue) {
+      const bs = state.teacher.bossStats;
+      const lang = getEffectiveWordLang();
+      const rawTarget = bs.wordList[bs.currentIndex % bs.wordList.length] || 'apple';
+      const target = lang === 'en' ? rawTarget.toLowerCase() : rawTarget;
+      const compareTyped = lang === 'en' ? typedValue.toLowerCase() : typedValue;
+      const displayEl = document.getElementById('boss-target-word-display');
+
+      if (lang === 'zh' && bs.isComposing) {
+        displayEl.innerHTML = `<span class="text-slate-800">${escapeHtml(target)}</span>`;
+        return;
+      }
+
+      let html = '';
+      for (let i = 0; i < target.length; i++) {
+        const targetChar = target[i];
+        const safeChar = targetChar === ' ' ? '&nbsp;' : escapeHtml(targetChar);
+        if (i < compareTyped.length) {
+          if (compareTyped[i] === targetChar) {
+            html += `<span class="text-emerald-600">${safeChar}</span>`;
+          } else {
+            html += `<span class="text-rose-600 bg-rose-100 rounded px-0.5">${safeChar}</span>`;
+          }
+        } else if (i === compareTyped.length) {
+          html += `<span class="text-slate-900 border-b-4 border-amber-500">${safeChar}</span>`;
+        } else {
+          html += `<span class="text-slate-400">${safeChar}</span>`;
+        }
+      }
+      displayEl.innerHTML = html;
+    }
+
+    const bossTypingInput = document.getElementById('boss-typing-input');
+    bossTypingInput.addEventListener('compositionstart', () => {
+      state.teacher.bossStats.isComposing = true;
+    });
+    bossTypingInput.addEventListener('compositionend', () => {
+      state.teacher.bossStats.isComposing = false;
+      handleBossInputEvaluation();
+    });
+    bossTypingInput.addEventListener('input', () => {
+      if (!state.teacher.isPlaying || state.teacher.mode !== 'boss') return;
+      playTone('key');
+      if (!state.teacher.bossStats.isComposing) {
+        handleBossInputEvaluation();
+      }
+    });
+    bossTypingInput.addEventListener('keydown', (e) => {
+      if (!state.teacher.isPlaying || state.teacher.mode !== 'boss') return;
+      if (e.key === 'Enter' && !state.teacher.bossStats.isComposing) {
+        e.preventDefault();
+        checkBossSubmitWord(true);
+      }
+    });
+
+    function handleBossInputEvaluation() {
+      const bs = state.teacher.bossStats;
+      const lang = getEffectiveWordLang();
+      const rawTarget = bs.wordList[bs.currentIndex % bs.wordList.length];
+      const target = lang === 'en' ? rawTarget.toLowerCase() : rawTarget;
+      const val = lang === 'en' ? bossTypingInput.value.toLowerCase() : bossTypingInput.value;
+
+      renderBossTargetWord(val);
+      if (val === target) {
+        checkBossSubmitWord(false);
+      }
+    }
+
+    function checkBossSubmitWord(isManualEnter) {
+      const bs = state.teacher.bossStats;
+      const lang = getEffectiveWordLang();
+      const rawTarget = bs.wordList[bs.currentIndex % bs.wordList.length];
+      const target = lang === 'en' ? rawTarget.toLowerCase() : rawTarget;
+      const val = lang === 'en' ? bossTypingInput.value.toLowerCase() : bossTypingInput.value;
+
+      bs.totalKeystrokes += Math.max(1, val.length);
+
+      if (val === target) {
+        playTone('score');
+        bs.wordsDone += 1;
+        bs.correctChars += target.length;
+        bs.combo += 1;
+        bs.maxCombo = Math.max(bs.maxCombo, bs.combo);
+
+        const basePoints = 10 + target.length * 2;
+        const comboBonus = Math.min(15, bs.combo * 2);
+        bs.score += basePoints + comboBonus;
+
+        const comboBadge = document.getElementById('boss-combo-badge');
+        if (bs.combo >= 2) {
+          document.getElementById('boss-combo-count').textContent = bs.combo;
+          comboBadge.classList.remove('hidden');
+        }
+
+        bs.currentIndex += 1;
+        bossTypingInput.value = '';
+        renderBossTargetWord('');
+        updateBossArenaScoreUI();
+        broadcastBossStateToStudents();
+      } else if (isManualEnter) {
+        playTone('error');
+        bs.combo = 0;
+        document.getElementById('boss-combo-badge').classList.add('hidden');
+        const card = document.getElementById('boss-typing-card');
+        card.classList.remove('animate-shake');
+        void card.offsetWidth;
+        card.classList.add('animate-shake');
+      }
+    }
+
+    function computeBossTeamData() {
+      const s1 = state.teacher.students[state.teacher.bossDuoIds[0]] || { name: '勇者1', score: 0 };
+      const s2 = state.teacher.students[state.teacher.bossDuoIds[1]] || { name: '勇者2', score: 0 };
+      const mult = state.teacher.bossMultiplier;
+      const rawSum = (s1.score || 0) + (s2.score || 0);
+      const multipliedTotal = rawSum * mult;
+      return { s1, s2, mult, rawSum, multipliedTotal };
+    }
+
+    function updateBossArenaScoreUI() {
+      const { s1, s2, mult, multipliedTotal } = computeBossTeamData();
+      const bs = state.teacher.bossStats;
+
+      document.getElementById('boss-arena-team-score').textContent = multipliedTotal;
+      document.getElementById('boss-arena-team-breakdown').textContent =
+        `(${s1.name} ${s1.score} + ${s2.name} ${s2.score}) × ${mult}`;
+      document.getElementById('boss-arena-boss-score').textContent = bs.score;
+      document.getElementById('boss-arena-boss-stats').textContent =
+        `完成 ${bs.wordsDone} 題 ｜ 連擊 ${bs.combo}`;
+
+      const grandTotal = multipliedTotal + bs.score;
+      const teamPct = grandTotal === 0 ? 50 : Math.min(90, Math.max(10, Math.round((multipliedTotal / grandTotal) * 100)));
+      document.getElementById('boss-arena-tug-bar').style.width = `${teamPct}%`;
+
+      const hint = document.getElementById('boss-arena-status-hint');
+      if (multipliedTotal > bs.score) {
+        hint.textContent = `🛡️ 學生聯隊領先魔王 ${multipliedTotal - bs.score} 分！`;
+        hint.className = 'text-sky-300 font-black';
+      } else if (bs.score > multipliedTotal) {
+        hint.textContent = `👹 大魔王領先聯隊 ${bs.score - multipliedTotal} 分！`;
+        hint.className = 'text-amber-300 font-black';
+      } else {
+        hint.textContent = '⚔️ 雙方勢均力敵！';
+        hint.className = 'text-white font-bold';
+      }
+    }
+
+    function broadcastBossStateToStudents() {
+      const { s1, s2, mult, multipliedTotal } = computeBossTeamData();
+      const bossScore = state.teacher.bossStats.score;
+
+      [s1, s2].forEach((player, idx) => {
+        const mate = idx === 0 ? s2 : s1;
+        if (player && player.conn && player.conn.open) {
+          player.conn.send({
+            type: 'boss_score_sync',
+            myRawScore: player.score,
+            teammateScore: mate ? mate.score : 0,
+            teamTotalScore: multipliedTotal,
+            bossScore: bossScore,
+            multiplier: mult
+          });
+        }
       });
     }
 
     function startTeacherTimers() {
       clearInterval(state.teacher.timerInterval);
       clearInterval(state.teacher.botInterval);
+      clearInterval(state.teacher.bossSyncInterval);
 
-      // 主計時器
+      // 主倒數計時器
       state.teacher.timerInterval = setInterval(() => {
         state.teacher.timeLeft--;
-        document.getElementById('teacher-timer-display').textContent = formatSeconds(Math.max(0, state.teacher.timeLeft));
+        const formatted = formatSeconds(Math.max(0, state.teacher.timeLeft));
+        document.getElementById('teacher-timer-display').textContent = formatted;
+        document.getElementById('boss-arena-timer').textContent = formatted;
 
         if (state.teacher.timeLeft <= 0) {
           finishTeacherMatch();
         }
       }, 1000);
 
-      // 虛擬學生自動打字模擬器 (國小三年級適中速度)
+      // 虛擬學生自動打字模擬器
       state.teacher.botInterval = setInterval(() => {
         if (!state.teacher.isPlaying) return;
         let updated = false;
@@ -1371,21 +1997,37 @@
             st.accuracy = 96;
             updated = true;
 
-            const opp = getOpponentOfStudent(st.id);
-            if (opp && opp.conn && opp.conn.open) {
-              opp.conn.send({ type: 'opponent_score', oppScore: st.score });
+            if (state.teacher.mode !== 'boss') {
+              const opp = getOpponentOfStudent(st.id);
+              if (opp && opp.conn && opp.conn.open) {
+                opp.conn.send({ type: 'opponent_score', oppScore: st.score });
+              }
             }
           }
         });
-        if (updated) updateTeacherLiveArenaUI();
+        if (updated) {
+          if (state.teacher.mode === 'boss') {
+            updateBossArenaScoreUI();
+            broadcastBossStateToStudents();
+          } else {
+            updateTeacherLiveArenaUI();
+          }
+        }
       }, 1600);
+
+      // 魔王模式下定期廣播同步狀態
+      if (state.teacher.mode === 'boss') {
+        state.teacher.bossSyncInterval = setInterval(() => {
+          if (state.teacher.isPlaying) broadcastBossStateToStudents();
+        }, 400);
+      }
     }
 
     function updateTeacherLiveArenaUI() {
       const cardsEl = document.getElementById('teacher-match-cards');
       cardsEl.innerHTML = state.teacher.pairings.map((pair, idx) => {
-        const p1 = state.teacher.students[pair.p1Id] || { name: '空缺', score: 0, wpm: 0 };
-        const p2 = state.teacher.students[pair.p2Id] || { name: '空缺', score: 0, wpm: 0 };
+        const p1 = state.teacher.students[pair.p1Id] || { name: '空缺', score: 0 };
+        const p2 = state.teacher.students[pair.p2Id] || { name: '空缺', score: 0 };
         const total = p1.score + p2.score;
         const p1Pct = total === 0 ? 50 : Math.min(88, Math.max(12, Math.round((p1.score / total) * 100)));
 
@@ -1413,7 +2055,6 @@
         `;
       }).join('');
 
-      // 更新全班即時積分排行榜
       const sorted = Object.values(state.teacher.students).sort((a, b) => b.score - a.score);
       const lbEl = document.getElementById('teacher-live-leaderboard');
       lbEl.innerHTML = sorted.map((st, idx) => {
@@ -1441,19 +2082,41 @@
       state.teacher.isPlaying = false;
       clearInterval(state.teacher.timerInterval);
       clearInterval(state.teacher.botInterval);
+      clearInterval(state.teacher.bossSyncInterval);
+      document.getElementById('boss-typing-input').disabled = true;
       playTone('go');
 
-      // 通知所有學生比賽結束
-      state.teacher.pairings.forEach(pair => {
-        const p1 = state.teacher.students[pair.p1Id];
-        const p2 = state.teacher.students[pair.p2Id];
-        if (p1 && p1.conn && p1.conn.open) {
-          p1.conn.send({ type: 'end_match', finalOppScore: p2 ? p2.score : 0 });
-        }
-        if (p2 && p2.conn && p2.conn.open) {
-          p2.conn.send({ type: 'end_match', finalOppScore: p1 ? p1.score : 0 });
-        }
-      });
+      const isBoss = state.teacher.mode === 'boss';
+
+      if (isBoss) {
+        const { s1, s2, mult, multipliedTotal } = computeBossTeamData();
+        const bossScore = state.teacher.bossStats.score;
+
+        [s1, s2].forEach((player, idx) => {
+          const mate = idx === 0 ? s2 : s1;
+          if (player && player.conn && player.conn.open) {
+            player.conn.send({
+              type: 'end_match',
+              isBossMode: true,
+              teammateScore: mate ? mate.score : 0,
+              teamTotalScore: multipliedTotal,
+              finalOppScore: bossScore,
+              multiplier: mult
+            });
+          }
+        });
+      } else {
+        state.teacher.pairings.forEach(pair => {
+          const p1 = state.teacher.students[pair.p1Id];
+          const p2 = state.teacher.students[pair.p2Id];
+          if (p1 && p1.conn && p1.conn.open) {
+            p1.conn.send({ type: 'end_match', isBossMode: false, finalOppScore: p2 ? p2.score : 0 });
+          }
+          if (p2 && p2.conn && p2.conn.open) {
+            p2.conn.send({ type: 'end_match', isBossMode: false, finalOppScore: p1 ? p1.score : 0 });
+          }
+        });
+      }
 
       document.getElementById('btn-stop-match').classList.add('hidden');
       document.getElementById('btn-start-match').classList.remove('hidden');
@@ -1465,31 +2128,106 @@
     }
 
     function openTeacherSummaryModal() {
-      const sorted = Object.values(state.teacher.students).sort((a, b) => b.score - a.score);
-      const mvp = sorted[0];
-
-      if (mvp) {
-        document.getElementById('mvp-name').textContent = mvp.name;
-        const unit = state.teacher.mode === 'en' ? 'WPM' : '字/分';
-        document.getElementById('mvp-stats').textContent = `最終得分：${mvp.score} 分 ｜ 速度：${mvp.wpm} ${unit} ｜ 正確率：${mvp.accuracy}%`;
-      }
-
+      const isBoss = state.teacher.mode === 'boss';
+      const effectiveLang = getEffectiveWordLang();
+      const unit = effectiveLang === 'en' ? 'WPM' : '字/分';
       const tbody = document.getElementById('summary-table-body');
-      const unit = state.teacher.mode === 'en' ? 'WPM' : '字/分';
-      tbody.innerHTML = sorted.map((st, idx) => {
-        const opp = getOpponentOfStudent(st.id);
-        const rankBadge = idx === 0 ? '🥇 1' : idx === 1 ? '🥈 2' : idx === 2 ? '🥉 3' : `${idx + 1}`;
-        return `
-          <tr class="${idx === 0 ? 'bg-amber-50/60 font-bold' : ''}">
-            <td class="py-3 px-4 font-black text-slate-700">${rankBadge}</td>
-            <td class="py-3 px-4 font-bold text-slate-900">${escapeHtml(st.name)}</td>
-            <td class="py-3 px-4 text-slate-500 text-xs">${opp ? escapeHtml(opp.name) : '-'}</td>
-            <td class="py-3 px-4 text-right font-mono-code font-black text-indigo-600">${st.score} 分</td>
-            <td class="py-3 px-4 text-right font-mono-code text-slate-700">${st.wpm} ${unit}</td>
-            <td class="py-3 px-4 text-right font-mono-code text-emerald-600">${st.accuracy}%</td>
+
+      if (isBoss) {
+        const { s1, s2, mult, rawSum, multipliedTotal } = computeBossTeamData();
+        const bs = state.teacher.bossStats;
+        const elapsedMin = Math.max(0.1, (state.teacher.duration - state.teacher.timeLeft) / 60);
+        const bossSpeed = effectiveLang === 'en'
+          ? Math.round((bs.correctChars / 5) / elapsedMin)
+          : Math.round(bs.correctChars / elapsedMin);
+        const bossAcc = bs.totalKeystrokes === 0
+          ? 100
+          : Math.min(100, Math.round((bs.correctChars / bs.totalKeystrokes) * 100));
+
+        const studentsWon = multipliedTotal >= bs.score;
+        document.getElementById('summary-badge-label').textContent = `魔王挑戰賽結算 (難度 ×${mult})`;
+        document.getElementById('summary-modal-title').textContent = studentsWon
+          ? '🎉 勇者聯隊大獲全勝！成功擊敗大魔王！'
+          : '👹 大魔王老師守住王座！勇者們再接再厲！';
+
+        document.getElementById('mvp-banner').className = studentsWon
+          ? 'bg-gradient-to-r from-sky-500 via-indigo-600 to-emerald-500 rounded-2xl p-5 text-white shadow-lg mb-5 flex items-center justify-between'
+          : 'bg-gradient-to-r from-amber-500 via-orange-600 to-rose-600 rounded-2xl p-5 text-white shadow-lg mb-5 flex items-center justify-between';
+
+        document.getElementById('mvp-icon').textContent = studentsWon ? '🛡️' : '👹';
+        document.getElementById('mvp-kicker').textContent = studentsWon ? '獲勝陣營：學生勇者聯隊' : '獲勝陣營：大魔王老師';
+        document.getElementById('mvp-name').textContent = studentsWon
+          ? `${s1.name} & ${s2.name} (${multipliedTotal} 分)`
+          : `${state.teacher.bossName} (${bs.score} 分)`;
+        document.getElementById('mvp-stats').textContent =
+          `學生聯隊：(${s1.score} + ${s2.score}) × ${mult} = ${multipliedTotal} 分  VS  魔王老師：${bs.score} 分`;
+        document.getElementById('mvp-right-tag').textContent = `倍率 ×${mult}`;
+
+        tbody.innerHTML = `
+          <tr class="bg-sky-50/70 font-bold">
+            <td class="py-3 px-4 font-black text-sky-700">🛡️ 聯隊總分</td>
+            <td class="py-3 px-4 font-black text-slate-900">${escapeHtml(s1.name)} + ${escapeHtml(s2.name)}</td>
+            <td class="py-3 px-4 text-xs text-sky-700">原始總分 ${rawSum} × ${mult} 倍</td>
+            <td class="py-3 px-4 text-right font-mono-code font-black text-sky-700 text-base">${multipliedTotal} 分</td>
+            <td class="py-3 px-4 text-right font-mono-code text-slate-600">-</td>
+            <td class="py-3 px-4 text-right font-mono-code text-slate-600">-</td>
+          </tr>
+          <tr>
+            <td class="py-3 px-4 font-bold text-slate-500">└ 勇者 1</td>
+            <td class="py-3 px-4 font-bold text-slate-800">${escapeHtml(s1.name)}</td>
+            <td class="py-3 px-4 text-xs text-slate-400">個人原始貢獻</td>
+            <td class="py-3 px-4 text-right font-mono-code font-bold text-slate-700">${s1.score} 分</td>
+            <td class="py-3 px-4 text-right font-mono-code text-slate-700">${s1.wpm || 0} ${unit}</td>
+            <td class="py-3 px-4 text-right font-mono-code text-emerald-600">${s1.accuracy ?? 100}%</td>
+          </tr>
+          <tr>
+            <td class="py-3 px-4 font-bold text-slate-500">└ 勇者 2</td>
+            <td class="py-3 px-4 font-bold text-slate-800">${escapeHtml(s2.name)}</td>
+            <td class="py-3 px-4 text-xs text-slate-400">個人原始貢獻</td>
+            <td class="py-3 px-4 text-right font-mono-code font-bold text-slate-700">${s2.score} 分</td>
+            <td class="py-3 px-4 text-right font-mono-code text-slate-700">${s2.wpm || 0} ${unit}</td>
+            <td class="py-3 px-4 text-right font-mono-code text-emerald-600">${s2.accuracy ?? 100}%</td>
+          </tr>
+          <tr class="bg-amber-50/80 font-bold">
+            <td class="py-3 px-4 font-black text-rose-600">👹 大魔王</td>
+            <td class="py-3 px-4 font-black text-slate-900">${escapeHtml(state.teacher.bossName)}</td>
+            <td class="py-3 px-4 text-xs text-amber-800">老師親自出戰 (完成 ${bs.wordsDone} 題)</td>
+            <td class="py-3 px-4 text-right font-mono-code font-black text-rose-600 text-base">${bs.score} 分</td>
+            <td class="py-3 px-4 text-right font-mono-code text-slate-700">${bossSpeed} ${unit}</td>
+            <td class="py-3 px-4 text-right font-mono-code text-emerald-600">${bossAcc}%</td>
           </tr>
         `;
-      }).join('');
+      } else {
+        const sorted = Object.values(state.teacher.students).sort((a, b) => b.score - a.score);
+        const mvp = sorted[0];
+
+        document.getElementById('summary-badge-label').textContent = '本局對戰結算';
+        document.getElementById('summary-modal-title').textContent = '🎉 全班成績總覽與 MVP 榮譽榜';
+        document.getElementById('mvp-banner').className = 'bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 rounded-2xl p-5 text-white shadow-lg mb-5 flex items-center justify-between';
+        document.getElementById('mvp-icon').textContent = '👑';
+        document.getElementById('mvp-kicker').textContent = '本局最高分 MVP';
+        document.getElementById('mvp-right-tag').textContent = '全班第一名';
+
+        if (mvp) {
+          document.getElementById('mvp-name').textContent = mvp.name;
+          document.getElementById('mvp-stats').textContent = `最終得分：${mvp.score} 分 ｜ 速度：${mvp.wpm} ${unit} ｜ 正確率：${mvp.accuracy}%`;
+        }
+
+        tbody.innerHTML = sorted.map((st, idx) => {
+          const opp = getOpponentOfStudent(st.id);
+          const rankBadge = idx === 0 ? '🥇 1' : idx === 1 ? '🥈 2' : idx === 2 ? '🥉 3' : `${idx + 1}`;
+          return `
+            <tr class="${idx === 0 ? 'bg-amber-50/60 font-bold' : ''}">
+              <td class="py-3 px-4 font-black text-slate-700">${rankBadge}</td>
+              <td class="py-3 px-4 font-bold text-slate-900">${escapeHtml(st.name)}</td>
+              <td class="py-3 px-4 text-slate-500 text-xs">${opp ? `VS ${escapeHtml(opp.name)}` : '-'}</td>
+              <td class="py-3 px-4 text-right font-mono-code font-black text-indigo-600">${st.score} 分</td>
+              <td class="py-3 px-4 text-right font-mono-code text-slate-700">${st.wpm} ${unit}</td>
+              <td class="py-3 px-4 text-right font-mono-code text-emerald-600">${st.accuracy}%</td>
+            </tr>
+          `;
+        }).join('');
+      }
 
       const modal = document.getElementById('teacher-summary-modal');
       modal.classList.remove('hidden');
@@ -1506,8 +2244,10 @@
       closeSummaryModal();
       document.getElementById('teacher-live-arena').classList.add('hidden');
       document.getElementById('teacher-live-arena').classList.remove('flex');
+      document.getElementById('teacher-boss-arena').classList.add('hidden');
+      document.getElementById('teacher-boss-arena').classList.remove('flex');
       document.getElementById('teacher-setup-area').classList.remove('hidden');
-      document.getElementById('teacher-status-pill').textContent = '等待配對與開始';
+      document.getElementById('teacher-status-pill').textContent = '等待設定與開始';
       document.getElementById('teacher-status-pill').className = 'px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-extrabold border border-amber-200';
       Object.values(state.teacher.students).forEach(st => {
         if (st.conn && st.conn.open) {
@@ -1519,7 +2259,7 @@
 
     function rematchSamePairs() {
       resetTeacherBackToLobby();
-      showToast('已保留原分組，隨時可按「開始倒數對戰」！', 'info');
+      showToast('已保留原陣容，隨時可按「開始倒數對戰」！', 'info');
     }
 
     function rematchNewPairs() {
@@ -1611,13 +2351,33 @@
         state.student.mode = data.mode || 'en';
         state.student.duration = data.duration || 60;
         state.student.opponentName = data.opponentName || '等待配對中...';
+        state.student.teammateName = data.teammateName || '';
+        state.student.isBossMode = !!data.isBossMode;
+        state.student.bossMultiplier = data.bossMultiplier || 1;
 
-        document.getElementById('lobby-opponent-name').textContent = state.student.opponentName;
-        document.getElementById('lobby-game-mode').textContent = state.student.mode === 'en' ? '英文單字' : '中文詞語';
+        if (state.student.isBossMode) {
+          document.getElementById('lobby-matchup-header').textContent = `👹 魔王挑戰賽 (聯隊總分 ×${state.student.bossMultiplier})`;
+          document.getElementById('lobby-left-avatar').textContent = '🛡️';
+          document.getElementById('lobby-my-name').textContent = `${state.student.myName} & ${state.student.teammateName}`;
+          document.getElementById('lobby-right-avatar').textContent = '👹';
+          document.getElementById('lobby-opponent-name').textContent = state.student.opponentName;
+          document.getElementById('lobby-game-mode').textContent =
+            `魔王戰 (${state.student.mode === 'en' ? '英文' : '中文'} ×${state.student.bossMultiplier})`;
+        } else {
+          document.getElementById('lobby-matchup-header').textContent = '本局對戰資訊';
+          document.getElementById('lobby-left-avatar').textContent = '我';
+          document.getElementById('lobby-my-name').textContent = state.student.myName;
+          document.getElementById('lobby-right-avatar').textContent = '敵';
+          document.getElementById('lobby-opponent-name').textContent = state.student.opponentName;
+          document.getElementById('lobby-game-mode').textContent = state.student.mode === 'en' ? '英文單字' : '中文詞語';
+        }
         document.getElementById('lobby-game-duration').textContent = `${state.student.duration} 秒`;
       } else if (data.type === 'start_match') {
-        state.student.matchId = data.matchId;
+        state.student.matchId = data.matchId || '';
         state.student.opponentName = data.opponentName || '對手';
+        state.student.teammateName = data.teammateName || '';
+        state.student.isBossMode = !!data.isBossMode;
+        state.student.bossMultiplier = data.bossMultiplier || 1;
         state.student.mode = data.mode || 'en';
         state.student.duration = data.duration || 60;
         state.student.wordList = (data.wordList && data.wordList.length > 0) ? data.wordList : [...DEFAULT_BANKS[state.student.mode]];
@@ -1629,8 +2389,17 @@
       } else if (data.type === 'opponent_score') {
         state.student.oppScore = data.oppScore || 0;
         updateStudentScoreUI();
+      } else if (data.type === 'boss_score_sync') {
+        state.student.teammateScore = data.teammateScore || 0;
+        state.student.oppScore = data.bossScore || 0;
+        state.student.bossMultiplier = data.multiplier || state.student.bossMultiplier;
+        updateStudentScoreUI();
       } else if (data.type === 'end_match') {
-        if (typeof data.finalOppScore === 'number') {
+        if (data.isBossMode) {
+          state.student.teammateScore = data.teammateScore ?? state.student.teammateScore;
+          state.student.oppScore = data.finalOppScore ?? state.student.oppScore;
+          state.student.bossMultiplier = data.multiplier || state.student.bossMultiplier;
+        } else if (typeof data.finalOppScore === 'number') {
           state.student.oppScore = data.finalOppScore;
         }
         finishStudentGameplay();
@@ -1639,12 +2408,14 @@
       }
     }
 
-    // 單機模擬測試模式 (學生 vs 電腦陪練員)
     function startSoloDemoMode() {
       cleanupAllSessions();
       state.role = 'solo';
       state.student.myName = document.getElementById('input-student-name').value.trim() || '三年級小選手';
       state.student.opponentName = '🤖 電腦陪練員';
+      state.student.teammateName = '';
+      state.student.isBossMode = false;
+      state.student.bossMultiplier = 1;
       state.student.mode = 'en';
       state.student.duration = 45;
       state.student.wordList = [...DEFAULT_BANKS.en].sort(() => Math.random() - 0.5);
@@ -1672,7 +2443,6 @@
       document.getElementById(subId).classList.remove('hidden');
     }
 
-    // 3-2-1 同步倒數遮罩
     function runCountdownOverlay(onComplete) {
       const overlay = document.getElementById('countdown-overlay');
       const numEl = document.getElementById('countdown-number');
@@ -1704,11 +2474,11 @@
       }, 850);
     }
 
-    // 準備學生端對戰畫面
     function prepareStudentBattleArena() {
       const st = state.student;
       st.currentIndex = 0;
       st.score = 0;
+      st.teammateScore = 0;
       st.oppScore = 0;
       st.combo = 0;
       st.maxCombo = 0;
@@ -1719,7 +2489,31 @@
       st.isComposing = false;
 
       showStudentSubView('student-battle-view');
-      document.getElementById('battle-my-name').textContent = st.myName;
+
+      const multTag = document.getElementById('battle-mult-tag');
+      const teamSubtext = document.getElementById('battle-team-subtext');
+      const leftAvatar = document.getElementById('battle-left-avatar');
+      const rightAvatar = document.getElementById('battle-right-avatar');
+
+      if (st.isBossMode) {
+        leftAvatar.textContent = '🛡️';
+        rightAvatar.textContent = '👹';
+        document.getElementById('battle-my-name').textContent = '勇者聯隊總分';
+        multTag.textContent = `×${st.bossMultiplier} 倍`;
+        multTag.classList.remove('hidden');
+        teamSubtext.classList.remove('hidden');
+        document.getElementById('battle-left-bar-label').textContent = '🛡️ 學生聯隊進攻 ➔';
+        document.getElementById('battle-right-bar-label').textContent = '⬅ 魔王反擊 🔥';
+      } else {
+        leftAvatar.textContent = '我';
+        rightAvatar.textContent = '敵';
+        document.getElementById('battle-my-name').textContent = st.myName;
+        multTag.classList.add('hidden');
+        teamSubtext.classList.add('hidden');
+        document.getElementById('battle-left-bar-label').textContent = '⚡ 我方推進 ➔';
+        document.getElementById('battle-right-bar-label').textContent = '⬅ 對手進攻 🔥';
+      }
+
       document.getElementById('battle-opp-name').textContent = st.opponentName;
       document.getElementById('battle-timer').textContent = st.duration;
       document.getElementById('speed-unit-label').textContent = st.mode === 'en' ? 'WPM' : '字/分';
@@ -1762,7 +2556,6 @@
       }, 1000);
     }
 
-    // 渲染目標題目與逐字即時顏色回饋 (英文模式自動轉小寫比對)
     function renderCurrentTargetWord(typedValue) {
       const st = state.student;
       const rawTarget = st.wordList[st.currentIndex % st.wordList.length] || 'apple';
@@ -1794,7 +2587,6 @@
       displayEl.innerHTML = html;
     }
 
-    // 綁定輸入框事件 (完整支援中文 IME 注音/倉頡組字)
     const typingInput = document.getElementById('student-typing-input');
 
     typingInput.addEventListener('compositionstart', () => {
@@ -1856,14 +2648,12 @@
         const comboBonus = Math.min(15, st.combo * 2);
         st.score += basePoints + comboBonus;
 
-        // 顯示連擊徽章
         const comboBadge = document.getElementById('combo-badge');
         if (st.combo >= 2) {
           document.getElementById('combo-count').textContent = st.combo;
           comboBadge.classList.remove('hidden');
         }
 
-        // 跳下一題
         st.currentIndex += 1;
         typingInput.value = '';
         renderCurrentTargetWord('');
@@ -1884,19 +2674,29 @@
 
     function updateStudentScoreUI() {
       const st = state.student;
-      document.getElementById('battle-my-score').textContent = st.score;
+      const leftEffectiveScore = st.isBossMode
+        ? (st.score + st.teammateScore) * st.bossMultiplier
+        : st.score;
+
+      document.getElementById('battle-my-score').textContent = leftEffectiveScore;
       document.getElementById('battle-opp-score').textContent = st.oppScore;
 
-      const total = st.score + st.oppScore;
-      const myPct = total === 0 ? 50 : Math.min(90, Math.max(10, Math.round((st.score / total) * 100)));
+      if (st.isBossMode) {
+        const mateLabel = st.teammateName || '隊友';
+        document.getElementById('battle-team-subtext').textContent =
+          `(我 ${st.score} + ${mateLabel} ${st.teammateScore}) × ${st.bossMultiplier}`;
+      }
+
+      const total = leftEffectiveScore + st.oppScore;
+      const myPct = total === 0 ? 50 : Math.min(90, Math.max(10, Math.round((leftEffectiveScore / total) * 100)));
       document.getElementById('battle-tug-bar').style.width = `${myPct}%`;
 
       const hint = document.getElementById('battle-status-hint');
-      if (st.score > st.oppScore) {
-        hint.textContent = `🔥 領先對手 ${st.score - st.oppScore} 分！`;
+      if (leftEffectiveScore > st.oppScore) {
+        hint.textContent = `🔥 領先 ${leftEffectiveScore - st.oppScore} 分！`;
         hint.className = 'text-sky-300 font-black';
-      } else if (st.score < st.oppScore) {
-        hint.textContent = `⚡ 落後 ${st.oppScore - st.score} 分，快追上！`;
+      } else if (leftEffectiveScore < st.oppScore) {
+        hint.textContent = `⚡ 落後 ${st.oppScore - leftEffectiveScore} 分，快追上！`;
         hint.className = 'text-orange-300 font-black';
       } else {
         hint.textContent = '⚔️ 雙方平手！';
@@ -1917,7 +2717,7 @@
 
       document.getElementById('stat-wpm').textContent = speed;
       document.getElementById('stat-accuracy').textContent = `${acc}%`;
-      document.getElementById('stat-max-combo').textContent = st.maxCombo;
+      document.getElementById('stat-raw-score').textContent = st.score;
       return { speed, acc };
     }
 
@@ -1950,22 +2750,37 @@
       const { speed, acc } = updateStudentStatsUI();
 
       showStudentSubView('student-result-view');
-      document.getElementById('res-my-score').textContent = st.score;
+
+      const finalMySideScore = st.isBossMode
+        ? (st.score + st.teammateScore) * st.bossMultiplier
+        : st.score;
+
+      document.getElementById('res-my-label').textContent = st.isBossMode ? '勇者聯隊最終總分' : '我的最終得分';
+      document.getElementById('res-my-score').textContent = finalMySideScore;
       document.getElementById('res-opp-score').textContent = st.oppScore;
       document.getElementById('res-opp-label').textContent = `${st.opponentName} 得分`;
       document.getElementById('res-words-done').textContent = `${st.wordsDone} 題`;
       document.getElementById('res-wpm').textContent = `${speed} ${st.mode === 'en' ? 'WPM' : '字/分'}`;
       document.getElementById('res-acc').textContent = `${acc}%`;
 
+      const formulaBox = document.getElementById('res-boss-formula-box');
+      if (st.isBossMode) {
+        const mateLabel = st.teammateName || '隊友';
+        formulaBox.textContent = `聯隊計算公式：(我 ${st.score} + ${mateLabel} ${st.teammateScore}) × ${st.bossMultiplier} = ${finalMySideScore} 分`;
+        formulaBox.classList.remove('hidden');
+      } else {
+        formulaBox.classList.add('hidden');
+      }
+
       const iconEl = document.getElementById('result-trophy-icon');
       const titleEl = document.getElementById('result-title');
       const subEl = document.getElementById('result-subtitle');
 
-      if (st.score > st.oppScore) {
+      if (finalMySideScore > st.oppScore) {
         iconEl.textContent = '🏆';
-        titleEl.textContent = '恭喜獲勝！';
-        subEl.textContent = '太厲害了！你的打字速度無人能敵！';
-      } else if (st.score < st.oppScore) {
+        titleEl.textContent = st.isBossMode ? '勇者聯隊勝利！' : '恭喜獲勝！';
+        subEl.textContent = st.isBossMode ? '太棒了！你們同心協力打敗了大魔王老師！' : '太厲害了！你的打字速度無人能敵！';
+      } else if (finalMySideScore < st.oppScore) {
         iconEl.textContent = '💪';
         titleEl.textContent = '表現很棒，繼續加油！';
         subEl.textContent = '差一點點就追上了，下一局一定能贏回來！';
@@ -1975,7 +2790,6 @@
         subEl.textContent = '雙方實力旗鼓相當，真是場好比賽！';
       }
 
-      // 單機模式顯示再玩一次按鈕
       const isSolo = state.role === 'solo';
       document.getElementById('solo-rematch-box').classList.toggle('hidden', !isSolo);
       document.getElementById('result-wait-hint').classList.toggle('hidden', isSolo);
