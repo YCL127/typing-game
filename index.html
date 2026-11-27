@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>打字王爭霸戰</title>
+  <title>打字王爭霸戰 </title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
@@ -28,7 +28,7 @@
     }
 
     .glass-card {
-      background: rgba(255, 255, 255, 0.88);
+      background: rgba(255, 255, 255, 0.9);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border: 2px solid rgba(255, 255, 255, 0.95);
@@ -59,13 +59,14 @@
     .btn-3d {
       transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
       border-bottom-width: 4px;
+      cursor: pointer;
     }
     .btn-3d:active:not(:disabled) {
       transform: translateY(3px);
       border-bottom-width: 1px;
     }
 
-    /* 台灣課本直式注音排版 */
+    /* 台灣課本直式注音排版（相容 Chrome / Edge / Safari） */
     .bopomofo-word {
       display: inline-flex;
       flex-wrap: wrap;
@@ -76,11 +77,10 @@
       line-height: 1.25;
     }
     .bopomofo-word ruby {
+      ruby-position: right;
       ruby-position: inter-character;
       -webkit-ruby-position: inter-character;
       ruby-align: center;
-      display: inline-flex;
-      align-items: center;
     }
     .bopomofo-word rt {
       font-size: 0.36em;
@@ -88,7 +88,6 @@
       color: #4f46e5;
       line-height: 1.05;
       letter-spacing: -0.05em;
-      margin-left: 2px;
       font-family: "Noto Sans TC", sans-serif;
     }
     .boss-mode .bopomofo-word rt {
@@ -102,6 +101,7 @@
       font-family: "BiauKai", "DFKai-SB", "標楷體", "Noto Sans TC", sans-serif;
     }
     .bopomofo-chip ruby {
+      ruby-position: right;
       ruby-position: inter-character;
       -webkit-ruby-position: inter-character;
     }
@@ -160,10 +160,10 @@
         <span id="connectionBadge" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
           <span class="w-2 h-2 rounded-full bg-slate-400"></span> 準備就緒
         </span>
-        <button id="soundToggleBtn" onclick="toggleSound()" class="p-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition" title="切換音效">
+        <button id="soundToggleBtn" type="button" onclick="toggleSound()" class="p-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition cursor-pointer" title="切換音效">
           🔊
         </button>
-        <button id="homeBtn" onclick="confirmReturnHome()" class="hidden px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition">
+        <button id="homeBtn" type="button" onclick="confirmReturnHome()" class="hidden px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition cursor-pointer">
           🏠 回首頁
         </button>
       </div>
@@ -193,7 +193,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
         <!-- 老師開房卡片 -->
         <div class="glass-card rounded-3xl p-6 sm:p-8 relative overflow-hidden group hover:border-indigo-400 transition-all">
-          <div class="absolute -right-8 -top-8 w-36 h-36 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition"></div>
+          <div class="absolute -right-8 -top-8 w-36 h-36 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
           <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-3xl shadow-lg mb-5">
             🧑‍🏫
           </div>
@@ -201,15 +201,15 @@
           <p class="text-slate-600 text-sm mb-6 leading-relaxed">
             開啟房間產生 4 位數房號，自由切換英文、注音中文或親自下場當「大魔王」與兩位學生聯隊對決！
           </p>
-          <div class="space-y-3">
-            <button id="btnCreateRoom" onclick="initTeacherHost()" class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-base shadow-lg shadow-indigo-500/25 btn-3d border-indigo-800 flex items-center justify-center gap-2">
+          <div class="space-y-3 relative z-10">
+            <button id="btnCreateRoom" type="button" onclick="initTeacherHost()" class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-base shadow-lg shadow-indigo-500/25 btn-3d border-indigo-800 flex items-center justify-center gap-2">
               <span>🚀 建立連線對戰房間</span>
             </button>
             <div class="grid grid-cols-2 gap-2.5">
-              <button onclick="startDemoMode('1v1')" class="py-2.5 px-3 rounded-2xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs sm:text-sm border border-indigo-200 transition flex items-center justify-center gap-1.5">
+              <button type="button" onclick="startDemoMode('1v1')" class="py-2.5 px-3 rounded-2xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs sm:text-sm border border-indigo-200 transition flex items-center justify-center gap-1.5 cursor-pointer">
                 <span>🎮 單機測試 (1v1)</span>
               </button>
-              <button onclick="startDemoMode('boss')" class="py-2.5 px-3 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs sm:text-sm border border-rose-200 transition flex items-center justify-center gap-1.5">
+              <button type="button" onclick="startDemoMode('boss')" class="py-2.5 px-3 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs sm:text-sm border border-rose-200 transition flex items-center justify-center gap-1.5 cursor-pointer">
                 <span>👹 體驗當魔王 (2v1)</span>
               </button>
             </div>
@@ -218,7 +218,7 @@
 
         <!-- 學生加入卡片 -->
         <div class="glass-card rounded-3xl p-6 sm:p-8 relative overflow-hidden group hover:border-pink-400 transition-all">
-          <div class="absolute -right-8 -top-8 w-36 h-36 bg-pink-500/10 rounded-full blur-2xl group-hover:bg-pink-500/20 transition"></div>
+          <div class="absolute -right-8 -top-8 w-36 h-36 bg-pink-500/10 rounded-full blur-2xl pointer-events-none"></div>
           <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-amber-500 text-white flex items-center justify-center text-3xl shadow-lg mb-5">
             🎒
           </div>
@@ -226,7 +226,7 @@
           <p class="text-slate-600 text-sm mb-5 leading-relaxed">
             輸入老師投影幕上的 4 位數房間號碼與你的名字，準備迎接挑戰！
           </p>
-          <div class="space-y-3.5">
+          <div class="space-y-3.5 relative z-10">
             <div>
               <label class="block text-xs font-bold text-slate-600 mb-1">4 位數房間號碼</label>
               <input id="joinRoomCodeInput" type="text" maxlength="4" inputmode="numeric" placeholder="例如：4829"
@@ -237,7 +237,7 @@
               <input id="joinStudentNameInput" type="text" maxlength="12" placeholder="例如：05 王小明"
                 class="w-full px-4 py-3 rounded-xl bg-white border-2 border-slate-200 focus:border-pink-500 focus:outline-none text-base font-bold text-slate-800" />
             </div>
-            <button id="btnJoinRoom" onclick="joinTeacherRoom()" class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-pink-500 to-amber-500 hover:from-pink-400 hover:to-amber-400 text-white font-black text-base shadow-lg shadow-pink-500/25 btn-3d border-pink-700 flex items-center justify-center gap-2">
+            <button id="btnJoinRoom" type="button" onclick="joinTeacherRoom()" class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-pink-500 to-amber-500 hover:from-pink-400 hover:to-amber-400 text-white font-black text-base shadow-lg shadow-pink-500/25 btn-3d border-pink-700 flex items-center justify-center gap-2">
               <span>⚡ 進入教室大廳</span>
             </button>
           </div>
@@ -269,7 +269,7 @@
       </div>
     </section>
 
-    <!-- ==================== 2. 老師端控制台 (大廳 / 戰況 / 魔王親自對戰 / 結算) ==================== -->
+    <!-- ==================== 2. 老師端控制台 ==================== -->
     <section id="viewTeacher" class="hidden space-y-6">
       
       <!-- 頂部房間資訊與狀態橫幅 -->
@@ -290,22 +290,22 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-2.5 w-full lg:w-auto justify-end">
-          <button onclick="addSimulatedBotStudent()" class="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/20 transition">
+          <button type="button" onclick="addSimulatedBotStudent()" class="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/20 transition cursor-pointer">
             🤖 加入虛擬學生
           </button>
-          <button id="teacherStartBtn" onclick="startMatchCountdown()" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-black text-sm sm:text-base shadow-lg shadow-emerald-500/30 btn-3d border-emerald-700">
+          <button id="teacherStartBtn" type="button" onclick="startMatchCountdown()" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-black text-sm sm:text-base shadow-lg shadow-emerald-500/30 btn-3d border-emerald-700">
             🔥 開始全員對戰
           </button>
-          <button id="teacherStopBtn" onclick="finishMatchEarly()" class="hidden px-5 py-2.5 rounded-2xl bg-rose-500 hover:bg-rose-400 text-white font-black text-sm shadow-lg btn-3d border-rose-700">
+          <button id="teacherStopBtn" type="button" onclick="finishMatchEarly()" class="hidden px-5 py-2.5 rounded-2xl bg-rose-500 hover:bg-rose-400 text-white font-black text-sm shadow-lg btn-3d border-rose-700">
             ⏹️ 提前結束結算
           </button>
-          <button id="teacherResetBtn" onclick="resetToLobby()" class="hidden px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-900 font-black text-sm shadow-lg btn-3d border-amber-700">
+          <button id="teacherResetBtn" type="button" onclick="resetToLobby()" class="hidden px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-900 font-black text-sm shadow-lg btn-3d border-amber-700">
             🔄 返回大廳重新配對
           </button>
         </div>
       </div>
 
-      <!-- 2A. 老師大廳設定與配對區 (待機時顯示) -->
+      <!-- 2A. 老師大廳設定與配對區 -->
       <div id="teacherLobbyPanel" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         <!-- 左側：對戰模式與題庫設定 (5欄) -->
@@ -321,22 +321,22 @@
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-2">1. 選擇對戰模式</label>
             <div class="grid grid-cols-3 gap-2">
-              <button id="modeBtnEn" onclick="setGameMode('en')" class="py-2.5 px-2 rounded-xl font-black text-xs sm:text-sm border-2 transition flex flex-col items-center justify-center gap-0.5 bg-indigo-600 text-white border-indigo-600 shadow-md">
+              <button id="modeBtnEn" type="button" onclick="setGameMode('en')" class="py-2.5 px-2 rounded-xl font-black text-xs sm:text-sm border-2 transition flex flex-col items-center justify-center gap-0.5 bg-indigo-600 text-white border-indigo-600 shadow-md cursor-pointer">
                 <span>🔤 英文單字</span>
                 <span class="text-[10px] font-normal opacity-90">1v1 對戰</span>
               </button>
-              <button id="modeBtnZh" onclick="setGameMode('zh')" class="py-2.5 px-2 rounded-xl font-black text-xs sm:text-sm border-2 transition flex flex-col items-center justify-center gap-0.5 bg-white text-slate-700 border-slate-200 hover:border-indigo-300">
+              <button id="modeBtnZh" type="button" onclick="setGameMode('zh')" class="py-2.5 px-2 rounded-xl font-black text-xs sm:text-sm border-2 transition flex flex-col items-center justify-center gap-0.5 bg-white text-slate-700 border-slate-200 hover:border-indigo-300 cursor-pointer">
                 <span>🀄 中文注音</span>
                 <span class="text-[10px] font-normal opacity-80">1v1 對戰</span>
               </button>
-              <button id="modeBtnBoss" onclick="setGameMode('boss')" class="py-2.5 px-2 rounded-xl font-black text-xs sm:text-sm border-2 transition flex flex-col items-center justify-center gap-0.5 bg-white text-rose-700 border-rose-200 hover:border-rose-400">
+              <button id="modeBtnBoss" type="button" onclick="setGameMode('boss')" class="py-2.5 px-2 rounded-xl font-black text-xs sm:text-sm border-2 transition flex flex-col items-center justify-center gap-0.5 bg-white text-rose-700 border-rose-200 hover:border-rose-400 cursor-pointer">
                 <span>👹 跟老師對戰</span>
                 <span class="text-[10px] font-normal opacity-80">2v1 魔王戰</span>
               </button>
             </div>
           </div>
 
-          <!-- 魔王挑戰賽專屬設定框 (僅在 boss 模式顯示) -->
+          <!-- 魔王挑戰賽專屬設定框 -->
           <div id="bossConfigBox" class="hidden p-4 rounded-2xl bg-gradient-to-br from-rose-50 to-amber-50 border-2 border-rose-200 space-y-3.5 animate-pop">
             <div class="flex items-center justify-between">
               <span class="text-xs font-black text-rose-800 flex items-center gap-1.5">
@@ -349,13 +349,13 @@
             <div>
               <label class="block text-[11px] font-bold text-rose-800 mb-1.5">學生聯隊分數倍率（兩位學生分數加總後乘以倍率）</label>
               <div class="grid grid-cols-3 gap-2">
-                <button id="diffBtnEasy" onclick="setBossMultiplier(3)" class="py-2 px-2 rounded-xl text-xs font-black border-2 transition bg-rose-600 text-white border-rose-600 shadow">
+                <button id="diffBtnEasy" type="button" onclick="setBossMultiplier(3)" class="py-2 px-2 rounded-xl text-xs font-black border-2 transition bg-rose-600 text-white border-rose-600 shadow cursor-pointer">
                   🌱 簡單 (×3)
                 </button>
-                <button id="diffBtnNormal" onclick="setBossMultiplier(2)" class="py-2 px-2 rounded-xl text-xs font-black border-2 transition bg-white text-rose-800 border-rose-200 hover:border-rose-400">
+                <button id="diffBtnNormal" type="button" onclick="setBossMultiplier(2)" class="py-2 px-2 rounded-xl text-xs font-black border-2 transition bg-white text-rose-800 border-rose-200 hover:border-rose-400 cursor-pointer">
                   ⚔️ 一般 (×2)
                 </button>
-                <button id="diffBtnHard" onclick="setBossMultiplier(1)" class="py-2 px-2 rounded-xl text-xs font-black border-2 transition bg-white text-rose-800 border-rose-200 hover:border-rose-400">
+                <button id="diffBtnHard" type="button" onclick="setBossMultiplier(1)" class="py-2 px-2 rounded-xl text-xs font-black border-2 transition bg-white text-rose-800 border-rose-200 hover:border-rose-400 cursor-pointer">
                   🔥 困難 (×1)
                 </button>
               </div>
@@ -382,10 +382,10 @@
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-2">2. 對戰限時</label>
             <div class="grid grid-cols-4 gap-2">
-              <button onclick="setDuration(30)" data-dur="30" class="dur-btn py-2 rounded-xl text-xs font-black border-2 bg-white text-slate-700 border-slate-200">30 秒</button>
-              <button onclick="setDuration(60)" data-dur="60" class="dur-btn py-2 rounded-xl text-xs font-black border-2 bg-indigo-600 text-white border-indigo-600">60 秒</button>
-              <button onclick="setDuration(90)" data-dur="90" class="dur-btn py-2 rounded-xl text-xs font-black border-2 bg-white text-slate-700 border-slate-200">90 秒</button>
-              <button onclick="setDuration(120)" data-dur="120" class="dur-btn py-2 rounded-xl text-xs font-black border-2 bg-white text-slate-700 border-slate-200">120 秒</button>
+              <button type="button" onclick="setDuration(30)" data-dur="30" class="dur-btn py-2 rounded-xl text-xs font-black border-2 bg-white text-slate-700 border-slate-200 cursor-pointer">30 秒</button>
+              <button type="button" onclick="setDuration(60)" data-dur="60" class="dur-btn py-2 rounded-xl text-xs font-black border-2 bg-indigo-600 text-white border-indigo-600 cursor-pointer">60 秒</button>
+              <button type="button" onclick="setDuration(90)" data-dur="90" class="dur-btn py-2 rounded-xl text-xs font-black border-2 bg-white text-slate-700 border-slate-200 cursor-pointer">90 秒</button>
+              <button type="button" onclick="setDuration(120)" data-dur="120" class="dur-btn py-2 rounded-xl text-xs font-black border-2 bg-white text-slate-700 border-slate-200 cursor-pointer">120 秒</button>
             </div>
           </div>
 
@@ -393,7 +393,7 @@
           <div>
             <div class="flex items-center justify-between mb-1.5">
               <label class="text-xs font-bold text-slate-600">3. 題庫內容（可自由編輯增刪）</label>
-              <button onclick="resetDefaultWords()" class="text-[11px] font-bold text-indigo-600 hover:underline">恢復三年級預設題庫</button>
+              <button type="button" onclick="resetDefaultWords()" class="text-[11px] font-bold text-indigo-600 hover:underline cursor-pointer">恢復三年級預設題庫</button>
             </div>
             <p id="zhFormatHint" class="hidden text-[11px] text-indigo-600 font-bold mb-1.5 bg-indigo-50 px-2.5 py-1 rounded-lg">
               💡 中文格式：「國字|注音1 注音2」（例如：蘋果|ㄆㄧㄥˊ ㄍㄨㄛˇ），直接打國字也會自動顯示！
@@ -416,7 +416,7 @@
                 </h3>
               </div>
               <div class="flex items-center gap-2">
-                <button onclick="autoPairStudents()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow btn-3d border-indigo-800">
+                <button type="button" onclick="autoPairStudents()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow btn-3d border-indigo-800">
                   🎲 隨機配對組合
                 </button>
               </div>
@@ -432,14 +432,13 @@
               <div id="pairListBox" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
             </div>
 
-            <!-- 2v1 魔王挑戰賽配對區 (僅在 boss 模式顯示) -->
+            <!-- 2v1 魔王挑戰賽配對區 -->
             <div id="pairingBossContainer" class="hidden space-y-4">
               <div class="p-5 rounded-2xl bg-gradient-to-r from-indigo-50 via-purple-50 to-rose-50 border-2 border-indigo-200">
                 <div class="text-center mb-4">
                   <span class="px-3 py-1 rounded-full bg-rose-600 text-white text-xs font-black shadow">👑 2 對 1 魔王挑戰賽對陣表</span>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-11 items-center gap-3">
-                  <!-- 學生聯隊 (兩位學生) -->
                   <div class="md:col-span-6 bg-white p-4 rounded-2xl border-2 border-indigo-300 shadow-sm space-y-2.5">
                     <div class="flex items-center justify-between">
                       <span class="text-xs font-black text-indigo-700">🛡️ 勇者學生聯隊（分數加總 × <span id="bossPreviewMult">3</span>）</span>
@@ -454,10 +453,8 @@
                     </div>
                   </div>
 
-                  <!-- VS 標誌 -->
                   <div class="md:col-span-1 text-center font-black text-2xl text-rose-600">VS</div>
 
-                  <!-- 大魔王老師 -->
                   <div class="md:col-span-4 bg-gradient-to-br from-rose-600 to-purple-800 text-white p-4 rounded-2xl shadow-md text-center">
                     <div class="text-3xl mb-1">👹</div>
                     <div id="bossCardTitleDisplay" class="font-black text-base">大魔王老師</div>
@@ -470,7 +467,7 @@
 
           <!-- 已連線成員名單膠囊列 -->
           <div class="mt-5 pt-4 border-t border-slate-200">
-            <div class="text-xs font-bold text-slate-500 mb-2">在線名單（點擊 ❌ 可請出房間）：</div>
+            <div class="text-xs font-bold text-slate-500 mb-2">在線名單（點擊 × 可請出房間）：</div>
             <div id="connectedStudentChips" class="flex flex-wrap gap-2">
               <span class="text-xs text-slate-400 italic">無</span>
             </div>
@@ -478,9 +475,8 @@
         </div>
       </div>
 
-      <!-- 2B. 老師即時戰況轉播區 (1v1 模式對戰中或結算時顯示) -->
+      <!-- 2B. 老師即時戰況轉播區 (1v1 模式) -->
       <div id="teacherLive1v1Panel" class="hidden space-y-6">
-        <!-- 倒數計時大橫幅 -->
         <div class="glass-card rounded-3xl p-4 sm:p-5 flex items-center justify-between border-2 border-indigo-300">
           <div class="flex items-center gap-3">
             <span class="text-2xl">⏱️</span>
@@ -495,10 +491,8 @@
           </div>
         </div>
 
-        <!-- 各組 1v1 拔河即時戰況卡片 -->
         <div id="liveMatchCardsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
 
-        <!-- 全班即時排行榜 -->
         <div class="glass-card rounded-3xl p-5 sm:p-6">
           <h3 class="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
             <span>🏆</span> 即時榮譽排行榜
@@ -507,9 +501,8 @@
         </div>
       </div>
 
-      <!-- 2C. 老師親自下場打字競技場 (2v1 魔王挑戰賽對戰中顯示) -->
+      <!-- 2C. 老師親自下場打字競技場 (2v1 魔王挑戰賽) -->
       <div id="teacherBossArenaPanel" class="hidden space-y-5">
-        <!-- 上半部：2v1 魔王拔河即時戰況儀表板 -->
         <div class="arena-dark rounded-3xl p-5 sm:p-6 text-white border-2 border-rose-500/40">
           <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
             <div class="flex items-center gap-2">
@@ -522,9 +515,7 @@
             </div>
           </div>
 
-          <!-- 聯隊 VS 魔王 分數對決條 -->
           <div class="grid grid-cols-1 md:grid-cols-3 items-center gap-4 mb-4">
-            <!-- 學生聯隊總分 -->
             <div class="bg-indigo-950/80 border border-indigo-400/40 rounded-2xl p-3.5">
               <div class="text-xs font-bold text-indigo-300 mb-1">🛡️ 勇者學生聯隊總分</div>
               <div id="bossArenaTeamTotal" class="text-3xl sm:text-4xl font-black text-cyan-300 tabular-nums">0</div>
@@ -533,14 +524,12 @@
               </div>
             </div>
 
-            <!-- 中央差距提示 -->
             <div class="text-center">
               <div id="bossArenaLeadText" class="inline-block px-4 py-1.5 rounded-full bg-white/10 text-sm font-black text-amber-300">
                 雙方勢均力敵！
               </div>
             </div>
 
-            <!-- 大魔王老師分數 -->
             <div class="bg-rose-950/80 border border-rose-400/40 rounded-2xl p-3.5 text-right">
               <div id="bossArenaTeacherLabel" class="text-xs font-bold text-rose-300 mb-1">👹 大魔王老師</div>
               <div id="bossArenaTeacherScore" class="text-3xl sm:text-4xl font-black text-rose-300 tabular-nums">0</div>
@@ -550,7 +539,6 @@
             </div>
           </div>
 
-          <!-- 發光拔河進度條 -->
           <div class="relative h-6 bg-slate-900 rounded-full overflow-hidden border-2 border-white/20 shadow-inner">
             <div id="bossArenaTugBar" class="tug-bar-transition h-full bg-gradient-to-r from-cyan-400 via-indigo-500 to-blue-600" style="width: 50%;"></div>
             <div class="absolute inset-0 flex items-center justify-between px-4 text-[11px] font-black pointer-events-none">
@@ -560,14 +548,12 @@
           </div>
         </div>
 
-        <!-- 下半部：老師親自打字輸入區 -->
         <div class="glass-card boss-mode rounded-3xl p-6 sm:p-8 border-2 border-rose-300 text-center max-w-3xl mx-auto">
           <div class="flex items-center justify-between mb-4">
             <span class="px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-black">⌨️ 老師打字輸入區（輸入完按空白鍵或 Enter 送出）</span>
             <span id="teacherBossComboBadge" class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-black">🔥 0 連擊</span>
           </div>
 
-          <!-- 題目顯示字卡 (支援直式注音) -->
           <div class="boss-keycap-box py-6 px-6 mb-5 min-h-[130px] flex flex-col items-center justify-center">
             <div id="teacherBossTargetDisplay" class="text-4xl sm:text-5xl font-black text-slate-900 tracking-wide">
               準備開始
@@ -577,14 +563,13 @@
             </div>
           </div>
 
-          <!-- 老師打字框 -->
           <input id="teacherBossInput" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
             placeholder="點這裡開始打字迎戰學生..."
             class="w-full max-w-xl mx-auto px-5 py-4 rounded-2xl bg-white border-3 border-rose-400 focus:border-rose-600 focus:outline-none text-center text-2xl sm:text-3xl font-black text-slate-900 shadow-inner" />
         </div>
       </div>
 
-      <!-- 2D. 賽後結算頒獎台 (結算時顯示) -->
+      <!-- 2D. 賽後結算頒獎台 -->
       <div id="teacherResultPanel" class="hidden glass-card rounded-3xl p-6 sm:p-8 text-center border-2 border-amber-300 animate-pop">
         <div class="text-5xl mb-2">🏆</div>
         <h3 id="resultWinnerHeadline" class="text-2xl sm:text-4xl font-black text-slate-900 mb-2">對戰結束！</h3>
@@ -597,7 +582,6 @@
     <!-- ==================== 3. 學生端個人對戰畫面 ==================== -->
     <section id="viewStudent" class="hidden max-w-3xl mx-auto space-y-5 animate-pop">
       
-      <!-- 學生個人頂部狀態卡 -->
       <div class="glass-card rounded-3xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-3">
           <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-amber-500 text-white flex items-center justify-center text-2xl font-black shadow">
@@ -640,8 +624,6 @@
 
       <!-- 3B. 學生對戰進行中畫面 -->
       <div id="studentBattleBox" class="hidden space-y-5">
-        
-        <!-- 即時拔河戰況條 (支援 1v1 與 2v1 聯隊模式) -->
         <div class="arena-dark rounded-3xl p-4 sm:p-5 text-white">
           <div class="flex items-center justify-between text-xs sm:text-sm font-black mb-2">
             <span id="studentLeftBarLabel" class="text-cyan-300">我方：0 分</span>
@@ -651,14 +633,12 @@
           <div class="relative h-5 bg-slate-900 rounded-full overflow-hidden border border-white/20">
             <div id="studentTugBar" class="tug-bar-transition h-full bg-gradient-to-r from-cyan-400 to-indigo-500" style="width: 50%;"></div>
           </div>
-          <!-- 2v1 聯隊隊友進度提示 -->
           <div id="studentTeammateBar" class="hidden mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between text-xs text-indigo-200">
             <span id="studentTeammateText">🛡️ 隊友戰況：連線同步中</span>
             <span id="studentMultiplierTag" class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 font-bold">聯隊加成 ×3</span>
           </div>
         </div>
 
-        <!-- 中央打字題目與輸入區 -->
         <div class="glass-card rounded-3xl p-6 sm:p-8 text-center">
           <div class="flex items-center justify-between mb-4">
             <span id="studentLangBadge" class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-xs font-black">🔤 英文單字模式</span>
@@ -668,7 +648,6 @@
             </div>
           </div>
 
-          <!-- 題目立體字卡 -->
           <div id="studentWordCard" class="keycap-box py-7 px-6 mb-6 min-h-[145px] flex flex-col items-center justify-center transition-all">
             <div id="studentTargetWordDisplay" class="text-4xl sm:text-6xl font-black text-slate-900 tracking-wide">
               apple
@@ -678,7 +657,6 @@
             </div>
           </div>
 
-          <!-- 學生輸入框 -->
           <input id="studentTypingInput" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
             placeholder="請在這裡打字..."
             class="w-full max-w-xl mx-auto px-5 py-4 rounded-2xl bg-white border-3 border-indigo-400 focus:border-indigo-600 focus:outline-none text-center text-2xl sm:text-3xl font-black text-slate-900 shadow-inner" />
@@ -729,7 +707,6 @@
       "open", "pen", "red", "star", "tree", "up", "very", "walk", "yes", "zoo"
     ];
 
-    // 100個三年級中文詞語：80個兩字詞語 + 20個三字以上詞語（皆附正確注音陣列）
     const DEFAULT_ZH_WORDS = [
       // --- 兩字詞語 (80個) ---
       { text: "蘋果", zhuyin: ["ㄆㄧㄥˊ", "ㄍㄨㄛˇ"] },
@@ -836,33 +813,29 @@
       { text: "五顏六色", zhuyin: ["ㄨˇ", "ㄧㄢˊ", "ㄌㄧㄡˋ", "ㄙㄜˋ"] }
     ];
 
-    // 建立快速注音查表 (讓老師自訂新增的詞語若在字典內也能自動補上注音)
     const ZHUYIN_LOOKUP = {};
     DEFAULT_ZH_WORDS.forEach(item => {
       ZHUYIN_LOOKUP[item.text] = item.zhuyin;
     });
 
     // ==================== 2. 全域狀態變數 ====================
-    let role = null; // 'teacher' | 'student'
+    let role = null;
     let isDemoMode = false;
     let peer = null;
     let roomCode = "";
     let soundEnabled = true;
 
-    // 老師端狀態
-    let gameMode = "en"; // 'en' | 'zh' | 'boss'
-    let bossSubLang = "zh"; // 'zh' | 'en' (魔王挑戰賽使用的語言)
-    let bossMultiplier = 3; // 3(簡單), 2(一般), 1(困難)
+    let gameMode = "en";
+    let bossSubLang = "zh";
+    let bossMultiplier = 3;
     let matchDuration = 60;
     let customEnWords = [...DEFAULT_EN_WORDS];
     let customZhWords = DEFAULT_ZH_WORDS.map(w => ({ ...w }));
 
-    // 連線與玩家資料: id -> { id, name, conn, isBot, score, words, combo, correctChars, totalChars }
     let students = {};
-    let pairs = []; // [{ p1: id, p2: id }]
-    let bossChallengers = [null, null]; // [studentId1, studentId2]
+    let pairs = [];
+    let bossChallengers = [null, null];
 
-    // 老師親自當魔王的狀態
     let teacherBossState = {
       score: 0,
       words: 0,
@@ -874,13 +847,11 @@
       isComposing: false
     };
 
-    // 比賽計時器與狀態
-    let matchStatus = "lobby"; // 'lobby' | 'countdown' | 'playing' | 'finished'
+    let matchStatus = "lobby";
     let remainingTime = 60;
     let matchTimerInterval = null;
     let botSimulationInterval = null;
 
-    // 學生端狀態
     let hostConn = null;
     let myStudentId = "";
     let myStudentName = "";
@@ -905,22 +876,38 @@
       bossScore: 0
     };
 
-    // ==================== 3. Web Audio 音效合成 ====================
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // ==================== 3. Web Audio 安全延遲初始化音效 ====================
+    let audioCtx = null;
+    function getSafeAudioContext() {
+      try {
+        if (!audioCtx) {
+          const Ctx = window.AudioContext || window.webkitAudioContext;
+          if (Ctx) audioCtx = new Ctx();
+        }
+        if (audioCtx && audioCtx.state === "suspended") {
+          audioCtx.resume().catch(() => {});
+        }
+        return audioCtx;
+      } catch (e) {
+        return null;
+      }
+    }
+
     function playTone(freq, type = "sine", duration = 0.1, vol = 0.12) {
       if (!soundEnabled) return;
       try {
-        if (audioCtx.state === "suspended") audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
+        const ctx = getSafeAudioContext();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
         osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(vol, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
         osc.connect(gain);
-        gain.connect(audioCtx.destination);
+        gain.connect(ctx.destination);
         osc.start();
-        osc.stop(audioCtx.currentTime + duration);
+        osc.stop(ctx.currentTime + duration);
       } catch (e) {}
     }
 
@@ -947,6 +934,7 @@
     // ==================== 4. 工具函式：注音渲染與提示訊息 ====================
     function showToast(msg, type = "info") {
       const container = document.getElementById("toastContainer");
+      if (!container) return;
       const el = document.createElement("div");
       const colors = {
         info: "bg-slate-900 text-white border-indigo-400",
@@ -963,10 +951,8 @@
       }, 2800);
     }
 
-    // 將詞語物件 { text, zhuyin } 或字串轉成課本直式注音 HTML
     function renderRubyWordHTML(wordItem, isSmallChip = false) {
       if (typeof wordItem === "string") {
-        // 若是純字串且在字典有注音
         if (ZHUYIN_LOOKUP[wordItem]) {
           wordItem = { text: wordItem, zhuyin: ZHUYIN_LOOKUP[wordItem] };
         } else {
@@ -1003,7 +989,6 @@
       return copy;
     }
 
-    // 動態載入 PeerJS (雙 CDN 備援)
     function loadPeerJSLibrary() {
       return new Promise((resolve, reject) => {
         if (window.Peer) return resolve(window.Peer);
@@ -1095,8 +1080,8 @@
             peer.destroy();
             initTeacherHost();
           } else {
-            showToast("網路連線異常，可改用單機測試模式", "error");
-            updateConnectionBadge("連線受限", "red");
+            showToast("網路連線異常，已為您切換為單機測試模式", "error");
+            startDemoMode("1v1");
           }
         });
       } catch (e) {
@@ -1117,7 +1102,6 @@
       setupTeacherLobbyUI();
       updateConnectionBadge("單機教學演示模式", "amber");
 
-      // 加入兩位虛擬學生方便演示
       addSimulatedBotStudent("01 陳小華");
       addSimulatedBotStudent("02 林小美");
 
@@ -1146,10 +1130,9 @@
       const btnZh = document.getElementById("modeBtnZh");
       const btnBoss = document.getElementById("modeBtnBoss");
 
-      // 重設按鈕樣式
-      btnEn.className = "py-2.5 px-2 rounded-xl font-black text-xs sm:text-sm border-2 transition flex flex-col items-center justify-center gap-0.5 bg-white text-slate-700 border-slate-200 hover:border-indigo-300";
-      btnZh.className = "py-2.5 px-2 rounded-xl font-black text-xs sm:text-sm border-2 transition flex flex-col items-center justify-center gap-0.5 bg-white text-slate-700 border-slate-200 hover:border-indigo-300";
-      btnBoss.className = "py-2.5 px-2 rounded-xl font-black text-xs sm:text-sm border-2 transition flex flex-col items-center justify-center gap-0.5 bg-white text-rose-700 border-rose-200 hover:border-rose-400";
+      btnEn.className = "py-2.5 px-2 rounded-xl font-black text-xs sm:text-sm border-2 transition flex flex-col items-center justify-center gap-0.5 bg-white text-slate-700 border-slate-200 hover:border-indigo-300 cursor-pointer";
+      btnZh.className = "py-2.5 px-2 rounded-xl font-black text-xs sm:text-sm border-2 transition flex flex-col items-center justify-center gap-0.5 bg-white text-slate-700 border-slate-200 hover:border-indigo-300 cursor-pointer";
+      btnBoss.className = "py-2.5 px-2 rounded-xl font-black text-xs sm:text-sm border-2 transition flex flex-col items-center justify-center gap-0.5 bg-white text-rose-700 border-rose-200 hover:border-rose-400 cursor-pointer";
 
       const bossBox = document.getElementById("bossConfigBox");
       const pair1v1 = document.getElementById("pairing1v1Container");
@@ -1157,21 +1140,21 @@
       const modeBadge = document.getElementById("teacherModeBadge");
 
       if (mode === "en") {
-        btnEn.className = "py-2.5 px-2 rounded-xl font-black text-xs sm:text-sm border-2 transition flex flex-col items-center justify-center gap-0.5 bg-indigo-600 text-white border-indigo-600 shadow-md";
+        btnEn.className = "py-2.5 px-2 rounded-xl font-black text-xs sm:text-sm border-2 transition flex flex-col items-center justify-center gap-0.5 bg-indigo-600 text-white border-indigo-600 shadow-md cursor-pointer";
         bossBox.classList.add("hidden");
         pair1v1.classList.remove("hidden");
         pairBoss.classList.add("hidden");
         modeBadge.textContent = "1v1 英文單字戰";
         modeBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-black bg-indigo-500 text-white";
       } else if (mode === "zh") {
-        btnZh.className = "py-2.5 px-2 rounded-xl font-black text-xs sm:text-sm border-2 transition flex flex-col items-center justify-center gap-0.5 bg-indigo-600 text-white border-indigo-600 shadow-md";
+        btnZh.className = "py-2.5 px-2 rounded-xl font-black text-xs sm:text-sm border-2 transition flex flex-col items-center justify-center gap-0.5 bg-indigo-600 text-white border-indigo-600 shadow-md cursor-pointer";
         bossBox.classList.add("hidden");
         pair1v1.classList.remove("hidden");
         pairBoss.classList.add("hidden");
         modeBadge.textContent = "1v1 中文注音戰";
         modeBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-black bg-purple-500 text-white";
       } else if (mode === "boss") {
-        btnBoss.className = "py-2.5 px-2 rounded-xl font-black text-xs sm:text-sm border-2 transition flex flex-col items-center justify-center gap-0.5 bg-rose-600 text-white border-rose-600 shadow-md";
+        btnBoss.className = "py-2.5 px-2 rounded-xl font-black text-xs sm:text-sm border-2 transition flex flex-col items-center justify-center gap-0.5 bg-rose-600 text-white border-rose-600 shadow-md cursor-pointer";
         bossBox.classList.remove("hidden");
         pair1v1.classList.add("hidden");
         pairBoss.classList.remove("hidden");
@@ -1193,9 +1176,9 @@
       [3, 2, 1].forEach(m => {
         const el = document.getElementById(map[m]);
         if (m === mult) {
-          el.className = "py-2 px-2 rounded-xl text-xs font-black border-2 transition bg-rose-600 text-white border-rose-600 shadow";
+          el.className = "py-2 px-2 rounded-xl text-xs font-black border-2 transition bg-rose-600 text-white border-rose-600 shadow cursor-pointer";
         } else {
-          el.className = "py-2 px-2 rounded-xl text-xs font-black border-2 transition bg-white text-rose-800 border-rose-200 hover:border-rose-400";
+          el.className = "py-2 px-2 rounded-xl text-xs font-black border-2 transition bg-white text-rose-800 border-rose-200 hover:border-rose-400 cursor-pointer";
         }
       });
     }
@@ -1291,8 +1274,8 @@
       document.querySelectorAll(".dur-btn").forEach(btn => {
         const isSelected = Number(btn.dataset.dur) === sec;
         btn.className = isSelected
-          ? "dur-btn py-2 rounded-xl text-xs font-black border-2 bg-indigo-600 text-white border-indigo-600"
-          : "dur-btn py-2 rounded-xl text-xs font-black border-2 bg-white text-slate-700 border-slate-200 hover:border-indigo-300";
+          ? "dur-btn py-2 rounded-xl text-xs font-black border-2 bg-indigo-600 text-white border-indigo-600 cursor-pointer"
+          : "dur-btn py-2 rounded-xl text-xs font-black border-2 bg-white text-slate-700 border-slate-200 hover:border-indigo-300 cursor-pointer";
       });
     }
 
@@ -1385,7 +1368,6 @@
           p2: shuffled[i + 1] || null
         });
       }
-      // 同步更新魔王戰的兩位參賽學生
       bossChallengers = [ids[0] || null, ids[1] || null];
       renderTeacherStudentList();
       if (!silent && ids.length > 0) showToast("已完成隨機配對！", "info");
@@ -1395,7 +1377,6 @@
       const ids = Object.keys(students);
       document.getElementById("connectedCountBadge").textContent = `${ids.length} 人在線`;
 
-      // 更新在線名單膠囊列
       const chipsBox = document.getElementById("connectedStudentChips");
       if (ids.length === 0) {
         chipsBox.innerHTML = `<span class="text-xs text-slate-400 italic">無</span>`;
@@ -1403,12 +1384,11 @@
         chipsBox.innerHTML = ids.map(id => `
           <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-xs font-bold text-indigo-800">
             <span>${escapeHTML(students[id].name)}</span>
-            <button onclick="removeStudent('${id}')" class="text-rose-500 hover:text-rose-700 font-black ml-1" title="移除">×</button>
+            <button type="button" onclick="removeStudent('${id}')" class="text-rose-500 hover:text-rose-700 font-black ml-1 cursor-pointer" title="移除">×</button>
           </span>
         `).join("");
       }
 
-      // 1v1 配對卡片渲染
       const placeholder = document.getElementById("emptyStudentsPlaceholder");
       const pairListBox = document.getElementById("pairListBox");
 
@@ -1514,7 +1494,6 @@
         }
       }
 
-      // 重設所有參戰者分數
       Object.values(students).forEach(s => {
         s.score = 0;
         s.words = 0;
@@ -1526,7 +1505,6 @@
       const activeLang = getActiveLanguage();
       const sourceBank = activeLang === "en" ? customEnWords : customZhWords;
       const sharedWordList = shuffleArray(sourceBank);
-      // 擴充題庫長度確保 120 秒內打不完
       let extendedWordList = [];
       while (extendedWordList.length < 150) {
         extendedWordList = extendedWordList.concat(shuffleArray(sharedWordList));
@@ -1534,7 +1512,6 @@
 
       const bossName = document.getElementById("teacherBossNameInput").value.trim() || "大魔王老師";
 
-      // 若是魔王戰，初始化老師自己的打字狀態
       if (gameMode === "boss") {
         teacherBossState = {
           score: 0,
@@ -1548,7 +1525,6 @@
         };
       }
 
-      // 發送開戰指令給每位連線學生
       Object.values(students).forEach(s => {
         if (!s.conn) return;
         if (gameMode === "boss") {
@@ -1581,7 +1557,6 @@
         }
       });
 
-      // 顯示全螢幕 3-2-1 倒數
       matchStatus = "countdown";
       let count = 3;
       const overlay = document.getElementById("countdownOverlay");
@@ -1610,7 +1585,6 @@
       matchStatus = "playing";
       remainingTime = matchDuration;
 
-      // 切換老師端按鈕與面板
       document.getElementById("teacherStartBtn").classList.add("hidden");
       document.getElementById("teacherStopBtn").classList.remove("hidden");
       document.getElementById("teacherResetBtn").classList.add("hidden");
@@ -1643,12 +1617,10 @@
 
       syncAllPlayersLiveStatus();
 
-      // 啟動虛擬學生自動打字模擬 (若有虛擬學生或電腦陪練員)
       botSimulationInterval = setInterval(() => {
         if (matchStatus !== "playing") return;
         Object.values(students).forEach(s => {
           if (s.isBot) {
-            // 模擬國小三年級打字速度：每 2.5~4 秒完成一題
             if (Math.random() < 0.42) {
               s.words += 1;
               s.combo += 1;
@@ -1661,7 +1633,6 @@
         syncAllPlayersLiveStatus();
       }, 1500);
 
-      // 啟動比賽主倒數計時器
       matchTimerInterval = setInterval(() => {
         remainingTime--;
         if (gameMode === "boss") {
@@ -1670,7 +1641,6 @@
           document.getElementById("teacherTimer1v1").textContent = `${remainingTime}s`;
         }
 
-        // 每秒廣播同步時間與戰況
         syncAllPlayersLiveStatus();
 
         if (remainingTime <= 0) {
@@ -1783,7 +1753,6 @@
     // ==================== 10. 即時戰況同步與結算 ====================
     function syncAllPlayersLiveStatus() {
       if (gameMode === "boss") {
-        // 計算學生聯隊總分
         const s1 = bossChallengers[0] ? students[bossChallengers[0]] : null;
         const s2 = bossChallengers[1] ? students[bossChallengers[1]] : null;
         const score1 = s1 ? s1.score : 0;
@@ -1801,7 +1770,6 @@
         document.getElementById("bossArenaTeacherStats").textContent =
           `完成 ${teacherBossState.words} 題 · 連擊 ${teacherBossState.combo}`;
 
-        // 拔河條百分比計算
         const sumAll = teamTotal + bossScore;
         const leftPct = sumAll === 0 ? 50 : Math.max(8, Math.min(92, Math.round((teamTotal / sumAll) * 100)));
         document.getElementById("bossArenaTugBar").style.width = `${leftPct}%`;
@@ -1815,7 +1783,6 @@
           leadEl.textContent = `⚡ 雙方平手激戰中！`;
         }
 
-        // 推播給兩位参戰學生
         [s1, s2].forEach((stu, idx) => {
           if (!stu || !stu.conn) return;
           const mate = idx === 0 ? s2 : s1;
@@ -1830,7 +1797,6 @@
         });
 
       } else {
-        // 1v1 模式戰況更新
         const allArr = Object.values(students);
         const topScore = allArr.length > 0 ? Math.max(...allArr.map(s => s.score)) : 0;
         document.getElementById("teacherTopScore1v1").textContent = `${topScore} 分`;
@@ -1842,7 +1808,6 @@
           if (!s1) return "";
 
           const sc1 = s1.score;
-          // 若無第二位學生，電腦陪練員自動模擬緩慢加分
           const sc2 = s2 ? s2.score : Math.floor((matchDuration - remainingTime) * 2.2);
           const total = sc1 + sc2;
           const pct1 = total === 0 ? 50 : Math.max(10, Math.min(90, Math.round((sc1 / total) * 100)));
@@ -1876,7 +1841,6 @@
           `;
         }).join("");
 
-        // 排行榜
         const sorted = [...allArr].sort((a, b) => b.score - a.score);
         document.getElementById("teacherLeaderboard1v1").innerHTML = sorted.map((s, rank) => {
           const medal = rank === 0 ? "🥇" : rank === 1 ? "🥈" : rank === 2 ? "🥉" : `#${rank + 1}`;
@@ -1895,7 +1859,6 @@
           `;
         }).join("");
 
-        // 推播對手分數給每位學生
         pairs.forEach(pair => {
           const s1 = students[pair.p1];
           const s2 = pair.p2 ? students[pair.p2] : null;
@@ -2110,7 +2073,6 @@
         stuState.bossName = data.bossName || "大魔王老師";
         stuState.bossScore = 0;
 
-        // 播放 3-2-1 倒數
         let count = 3;
         const overlay = document.getElementById("countdownOverlay");
         const numEl = document.getElementById("countdownNumber");
@@ -2258,7 +2220,6 @@
       }
     }
 
-    // 學生輸入事件監聽（完整支援注音組字與英文小寫容錯）
     const stuInputEl = document.getElementById("studentTypingInput");
     stuInputEl.addEventListener("compositionstart", () => {
       stuState.isComposing = true;
@@ -2315,7 +2276,6 @@
         renderStudentTargetWord();
         updateStudentTugBar();
 
-        // 回報即時進度給老師
         if (hostConn && hostConn.open) {
           hostConn.send({
             type: "progress",
