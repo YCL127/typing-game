@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>班級即時打字對戰系統 | Typing Battle</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, -apple-system, sans-serif;
+      background-color: #eef2ff;
+      background-image: 
+        radial-gradient(at 10% 10%, rgba(129, 140, 248, 0.22) 0px, transparent 50%),
+        radial-gradient(at 90% 15%, rgba(52, 211, 153, 0.20) 0px, transparent 50%),
+        radial-gradient(at 50% 90%, rgba(251, 146, 60, 0.16) 0px, transparent 55%),
+        radial-gradient(#cbd5e1 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 24px 24px;
+      color: #0f172a;
+      overflow-x: hidden;
+    }
+    .font-mono-code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    /* 毛玻璃面板質感 */
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.90);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    /* 角色卡片懸停微浮動 */
+    .role-card {
+      transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease, border-color 0.28s ease;
+    }
+    .role-card:hover {
+      transform: translateY(-6px);
+    }
+    /* 立體鍵帽/字卡陰影 */
+    .keycap-card {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      box-shadow: 0 8px 0 #cbd5e1, 0 15px 25px -5px rgba(15, 23, 42, 0.12);
+    }
+    /* 深色星空競技場計分板 */
+    .arena-scoreboard {
+      background: radial-gradient(circle at top right, #312e81 0%, #0f172a 65%, #020617 100%);
+    }
+    /* 拔河進度條平滑動畫與發光火花 */
+    .tug-transition {
+      transition: width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .tug-glow-blue {
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.75);
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .animate-shake {
+      animation: shake 0.3s ease-in-out;
+    }
+    @keyframes popScore {
+      0% { transform: scale(0.8); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop {
+      animation: popScore 0.25s ease-out;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(226, 232, 240, 0.6);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col relative">
+
+  <!-- 全域錯誤診斷提示條 (僅在意外錯誤時顯示) -->
+  <div id="global-error-banner" class="hidden bg-rose-600 text-white px-4 py-2 text-xs font-bold text-center z-50"></div>
+
+  <!-- 背景裝飾光暈 -->
+  <div class="fixed -top-24 -left-24 w-96 h-96 bg-indigo-400/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/3 -right-24 w-80 h-80 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed -bottom-24 left-1/3 w-96 h-96 bg-amber-300/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- 全域頂部通知 Toast -->
+  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- 3-2-1 倒數遮罩 -->
+  <div id="countdown-overlay" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-40 hidden flex-col items-center justify-center text-white">
+    <div id="countdown-number" class="text-9xl font-black tracking-tighter text-amber-400 drop-shadow-[0_0_30px_rgba(251,191,36,0.75)]">3</div>
+    <p id="countdown-subtitle" class="mt-4 text-2xl font-bold text-indigo-200 tracking-wide">準備好你的雙手！</p>
+  </div>
+
+  <!-- 頂部導覽列 -->
+  <header class="glass-panel border-b border-white/60 px-4 py-3 shadow-sm sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-500/30">
+          ⌨️
+        </div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-black text-slate-800 tracking-tight leading-none">班級即時打字對戰系統</h1>
+          <span class="text-xs text-indigo-600 font-bold">國小三年級歡樂版 • 免伺服器即時連線</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <!-- 連線狀態燈號 -->
+        <div id="connection-badge" class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 text-slate-700 text-xs font-bold border border-slate-200/80 shadow-sm">
+          <span id="connection-dot" class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+          <span id="connection-text">待機中</span>
+        </div>
+
+        <!-- 音效開關 -->
+        <button id="btn-sound-toggle" onclick="toggleSound()" class="p-2 rounded-xl bg-white/80 hover:bg-white text-slate-700 border border-slate-200/80 shadow-sm transition" title="切換音效">
+          <span id="sound-icon">🔊</span>
+        </button>
+
+        <!-- 返回首頁按鈕 -->
+        <button id="btn-home" onclick="confirmReturnHome()" class="hidden px-3.5 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold shadow-sm transition">
+          離開房間
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主要內容容器 -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col">
+
+    <!-- ==================== 1. 入口選擇畫面 (Entry Screen) ==================== -->
+    <section id="view-entry" class="flex-1 flex flex-col items-center justify-center py-6">
+      <div class="text-center max-w-2xl mb-9">
+        <span class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-sky-500 text-white text-xs font-black tracking-wide shadow-md shadow-indigo-500/20 mb-4">
+          <span>⚡ 校園電競打字賽</span>
+          <span>•</span>
+          <span>三年級基礎單字 &amp; 詞語</span>
+        </span>
+        <h2 class="text-3xl sm:text-5xl font-black text-slate-900 mb-3 tracking-tight">
+          誰是班上的<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-sky-500 to-orange-500">打字小神手</span>？
+        </h2>
+        <p class="text-slate-600 text-base sm:text-lg font-medium">
+          老師一鍵開房自動兩兩配對，學生輸入 4 碼房號，展開刺激的 1 對 1 打字拔河賽！
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-7 w-full max-w-4xl">
+        <!-- 老師端卡片 -->
+        <div class="role-card glass-panel rounded-3xl p-6 sm:p-8 border-2 border-indigo-200/90 shadow-xl shadow-indigo-900/10 flex flex-col justify-between relative overflow-hidden">
+          <div class="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-indigo-600 via-violet-600 to-amber-400"></div>
+          <div>
+            <div class="flex items-center justify-between mb-5">
+              <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-600 to-slate-800 text-amber-300 flex items-center justify-center text-3xl shadow-lg shadow-indigo-600/25">
+                👩‍🏫
+              </div>
+              <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-black border border-amber-200">
+                HOST 控制台
+              </span>
+            </div>
+            <h3 class="text-2xl font-black text-slate-800 mb-2">我是老師 (建立房間)</h3>
+            <p class="text-slate-600 text-sm leading-relaxed mb-6">
+              產生 4 位數房間代碼、切換三年級中/英文題庫與比賽時間、管理學生兩兩配對，並在大螢幕即時轉播全班戰況！
+            </p>
+          </div>
+          <div class="space-y-3">
+            <button onclick="initTeacherRole()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-slate-900 hover:from-indigo-700 hover:to-slate-950 text-amber-300 font-black text-lg shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2 border border-indigo-500/30">
+              <span>👑 建立對戰房間</span>
+              <span>→</span>
+            </button>
+            <button onclick="startSoloDemoMode()" class="w-full py-2.5 px-4 rounded-xl bg-indigo-50/90 hover:bg-indigo-100 text-indigo-700 font-bold text-xs border border-indigo-200/80 transition flex items-center justify-center gap-1.5">
+              <span>🧪</span>
+              <span>單機模擬測試 (立即體驗學生 vs 電腦對戰)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 學生端卡片 -->
+        <div class="role-card glass-panel rounded-3xl p-6 sm:p-8 border-2 border-sky-200/90 shadow-xl shadow-sky-900/10 flex flex-col justify-between relative overflow-hidden">
+          <div class="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-sky-400 via-cyan-500 to-orange-500"></div>
+          <div>
+            <div class="flex items-center justify-between mb-5">
+              <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-400 to-orange-500 text-white flex items-center justify-center text-3xl shadow-lg shadow-sky-500/25">
+                🧑‍🎓
+              </div>
+              <span class="px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-black border border-orange-200">
+                PLAYER 選手端
+              </span>
+            </div>
+            <h3 class="text-2xl font-black text-slate-800 mb-2">我是學生 (加入房間)</h3>
+            <p class="text-slate-600 text-sm leading-relaxed mb-5">
+              輸入老師黑板上的 4 位數房間代碼與你的座號姓名，等待配對後即可上場挑戰！
+            </p>
+
+            <div class="space-y-4 mb-6">
+              <div>
+                <label class="block text-xs font-extrabold text-sky-800 uppercase mb-1">4 位數房間代碼</label>
+                <input id="input-room-code" type="text" inputmode="numeric" maxlength="4" placeholder="例如：4829"
+                  class="w-full px-4 py-3 rounded-xl border-2 border-sky-200 bg-white/90 focus:border-orange-500 focus:ring-4 focus:ring-orange-100 focus:outline-none text-2xl font-mono-code font-black tracking-widest text-center uppercase text-slate-800" />
+              </div>
+              <div>
+                <label class="block text-xs font-extrabold text-sky-800 uppercase mb-1">你的座號 / 姓名</label>
+                <input id="input-student-name" type="text" maxlength="12" placeholder="例如：05 王小明"
+                  class="w-full px-4 py-3 rounded-xl border-2 border-sky-200 bg-white/90 focus:border-orange-500 focus:ring-4 focus:ring-orange-100 focus:outline-none text-lg font-bold text-center text-slate-800" />
+              </div>
+            </div>
+          </div>
+
+          <button id="btn-join-room" onclick="initStudentRole()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-sky-500 via-blue-500 to-orange-500 hover:from-sky-600 hover:to-orange-600 text-white font-black text-lg shadow-lg shadow-orange-500/30 transition flex items-center justify-center gap-2">
+            <span>加入房間</span>
+            <span>🚀</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 2. 老師端控制台 (Teacher Dashboard) ==================== -->
+    <section id="view-teacher" class="hidden flex-1 flex flex-col gap-6">
+      
+      <!-- 頂部房間資訊與控制橫幅 -->
+      <div class="glass-panel rounded-3xl p-5 sm:p-6 border border-indigo-200/80 shadow-md flex flex-col lg:flex-row items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-4 sm:gap-6">
+          <div class="bg-gradient-to-br from-indigo-900 to-slate-900 border-2 border-amber-400/60 rounded-2xl px-5 py-3 text-center shadow-md">
+            <div class="text-xs font-extrabold text-amber-300 uppercase tracking-wider">房間代碼</div>
+            <div class="flex items-center gap-2 mt-0.5">
+              <span id="teacher-room-code" class="text-3xl sm:text-4xl font-mono-code font-black text-white tracking-widest">----</span>
+              <button onclick="copyRoomCode()" class="p-2 rounded-lg bg-white/15 hover:bg-white/25 text-amber-300 border border-white/20 text-xs font-bold transition" title="複製房號">
+                📋 複製
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-extrabold border border-indigo-200">
+                已連線學生：<span id="teacher-student-count">0</span> 人
+              </span>
+              <span id="teacher-status-pill" class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-extrabold border border-amber-200">
+                等待配對與開始
+              </span>
+            </div>
+            <p class="text-sm text-slate-600 font-medium mt-1.5">請學生開啟網頁並輸入左側 4 碼房號加入教室（或點右側新增虛擬學生測試）。</p>
+          </div>
+        </div>
+
+        <!-- 主控按鈕群 -->
+        <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-end">
+          <button id="btn-add-bot-student" onclick="addSimulatedStudent()" class="px-4 py-3 rounded-xl bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold text-sm shadow-sm transition">
+            ➕ 新增虛擬學生(測試)
+          </button>
+          <button id="btn-start-match" onclick="teacherStartMatch()" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-black text-base shadow-lg shadow-orange-500/30 transition flex items-center gap-2">
+            <span>🔥 開始倒數對戰</span>
+          </button>
+          <button id="btn-stop-match" onclick="teacherForceStopMatch()" class="hidden px-6 py-3.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-base shadow-lg shadow-rose-600/25 transition">
+            ⏹️ 強制結束本局
+          </button>
+        </div>
+      </div>
+
+      <!-- 老師端：對戰進行中「即時戰況轉播」畫面 -->
+      <div id="teacher-live-arena" class="hidden flex-col gap-6">
+        <div class="arena-scoreboard text-white rounded-3xl p-6 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4 border border-indigo-500/40 relative overflow-hidden">
+          <div class="flex items-center gap-4 z-10">
+            <div class="w-12 h-12 rounded-2xl bg-indigo-500/30 border border-indigo-400/40 flex items-center justify-center text-2xl shadow-inner">
+              ⚡
+            </div>
+            <div>
+              <div class="text-xs font-bold text-sky-300 uppercase tracking-wider">目前對戰模式 (三年級題庫)</div>
+              <div id="live-mode-label" class="text-xl font-black text-white">英文單字 (三年級全小寫)</div>
+            </div>
+          </div>
+
+          <div class="text-center z-10">
+            <div class="text-xs font-bold text-indigo-300 uppercase tracking-widest">剩餘時間</div>
+            <div id="teacher-timer-display" class="text-5xl sm:text-6xl font-mono-code font-black text-amber-400 tracking-tight drop-shadow-[0_0_15px_rgba(251,191,36,0.45)]">01:00</div>
+          </div>
+
+          <div class="text-right hidden sm:block z-10">
+            <div class="text-xs font-bold text-indigo-300">進行中對戰組數</div>
+            <div id="live-match-count" class="text-2xl font-black text-emerald-400">0 組</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- 左側 2/3：各組 1v1 即時拔河戰況卡片 -->
+          <div class="lg:col-span-2 flex flex-col gap-4">
+            <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
+              <span>⚔️ 各組即時拔河戰況</span>
+              <span class="text-xs font-bold text-indigo-600 bg-white/80 px-2.5 py-0.5 rounded-full border border-indigo-100">分數即時同步</span>
+            </h3>
+            <div id="teacher-match-cards" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+          </div>
+
+          <!-- 右側 1/3：即時個人總積分排行榜 -->
+          <div class="glass-panel rounded-3xl p-5 border border-indigo-100 shadow-md flex flex-col">
+            <h3 class="text-lg font-black text-slate-800 mb-3 flex items-center justify-between">
+              <span>🏆 即時積分排行榜</span>
+              <span class="text-xs font-black text-white bg-gradient-to-r from-indigo-600 to-sky-500 px-2.5 py-1 rounded-full">LIVE</span>
+            </h3>
+            <div id="teacher-live-leaderboard" class="flex-1 space-y-2.5 overflow-y-auto max-h-[520px] pr-1"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 老師端：賽前「規則設定、題庫與分組配對」畫面 -->
+      <div id="teacher-setup-area" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- 左欄 (5/12)：比賽設定與題庫編輯 -->
+        <div class="lg:col-span-5 glass-panel rounded-3xl p-6 border border-indigo-100 shadow-md flex flex-col gap-5">
+          <h3 class="text-lg font-black text-slate-800 border-b border-slate-200/70 pb-3 flex items-center justify-between">
+            <span>⚙️ 比賽規則與題庫設定</span>
+            <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg">國小三年級程度</span>
+          </h3>
+          
+          <!-- 打字模式選擇 -->
+          <div>
+            <label class="block text-xs font-extrabold text-slate-600 uppercase mb-2">1. 選擇打字模式</label>
+            <div class="grid grid-cols-2 gap-3">
+              <button id="mode-btn-en" onclick="setGameMode('en')" class="py-3 px-4 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-black text-sm transition flex items-center justify-center gap-2 shadow-sm">
+                <span>🔤</span> 英文單字 (全小寫)
+              </button>
+              <button id="mode-btn-zh" onclick="setGameMode('zh')" class="py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-black text-sm transition flex items-center justify-center gap-2">
+                <span>🀄</span> 中文詞語 (三年級)
+              </button>
+            </div>
+          </div>
+
+          <!-- 時間長度選擇 -->
+          <div>
+            <label class="block text-xs font-extrabold text-slate-600 uppercase mb-2">2. 比賽時間 (秒)</label>
+            <div class="grid grid-cols-4 gap-2">
+              <button onclick="setDuration(60)" data-dur="60" class="dur-btn py-2.5 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-black text-sm">60秒</button>
+              <button onclick="setDuration(90)" data-dur="90" class="dur-btn py-2.5 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm">90秒</button>
+              <button onclick="setDuration(120)" data-dur="120" class="dur-btn py-2.5 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm">120秒</button>
+              <input id="custom-duration-input" type="number" min="15" max="600" placeholder="自訂秒數" onchange="setDuration(parseInt(this.value, 10)||60)"
+                class="px-2 py-2 rounded-xl border-2 border-slate-200 bg-white text-center text-sm font-bold focus:border-indigo-500 focus:outline-none" />
+            </div>
+          </div>
+
+          <!-- 自訂題庫編輯器 -->
+          <div class="flex-1 flex flex-col">
+            <div class="flex items-center justify-between mb-2">
+              <label class="text-xs font-extrabold text-slate-600 uppercase">3. 對戰題庫 (每行一題，可自由修改)</label>
+              <button onclick="resetDefaultWordBank()" class="text-xs text-indigo-600 hover:underline font-bold">恢復三年級預設題庫</button>
+            </div>
+            <textarea id="word-bank-editor" rows="8"
+              class="w-full flex-1 p-3.5 rounded-2xl border-2 border-slate-200 bg-white/95 focus:border-indigo-500 focus:outline-none text-sm font-medium leading-relaxed resize-none"
+              placeholder="請輸入題目，每行一個單字或詞語..."></textarea>
+            <div class="flex justify-between items-center mt-2 text-xs text-slate-500 font-medium">
+              <span>英文模式自動轉小寫比對，不限大小寫鍵</span>
+              <span id="word-count-label" class="font-bold text-indigo-600">共 0 題</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右欄 (7/12)：連線學生與兩兩配對管理 -->
+        <div class="lg:col-span-7 glass-panel rounded-3xl p-6 border border-indigo-100 shadow-md flex flex-col gap-5">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/70 pb-3">
+            <div>
+              <h3 class="text-lg font-black text-slate-800">👥 學生名單與兩兩配對</h3>
+              <p class="text-xs text-slate-500">點擊自動隨機配對，或使用下拉選單微調；奇數人數自動補入電腦陪練。</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="autoPairStudents()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-black text-sm shadow-md shadow-indigo-500/20 transition flex items-center gap-1.5">
+                <span>🎲 自動隨機配對 (兩兩對戰)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 未配對 / 連線學生列表 -->
+          <div>
+            <div class="text-xs font-extrabold text-slate-500 uppercase mb-2">目前在線學生 (<span id="lobby-online-count">0</span>)</div>
+            <div id="lobby-students-chips" class="flex flex-wrap gap-2 min-h-[46px] p-3 rounded-2xl bg-indigo-50/60 border border-indigo-100">
+              <span class="text-xs text-slate-400 italic self-center">尚無學生連線，請學生輸入房號加入...</span>
+            </div>
+          </div>
+
+          <!-- 已建立的 1v1 對戰組別 -->
+          <div class="flex-1 flex flex-col">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-extrabold text-slate-600 uppercase">對戰分組表 (1 VS 1)</span>
+              <button onclick="addEmptyMatchSlot()" class="text-xs font-bold text-indigo-600 hover:text-indigo-800">+ 手動新增一組</button>
+            </div>
+            <div id="teacher-pairings-list" class="space-y-3 overflow-y-auto max-h-[340px] pr-1">
+              <div class="text-center py-10 border-2 border-dashed border-indigo-200/80 bg-white/50 rounded-2xl text-slate-400 text-sm">
+                學生加入後，請點擊右上角「🎲 自動隨機配對」建立對戰組合
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== 3. 學生端畫面 (Student Screen) ==================== -->
+    <section id="view-student" class="hidden flex-1 flex flex-col">
+      
+      <!-- 學生等待室 (Waiting Lobby) -->
+      <div id="student-lobby-view" class="flex-1 flex flex-col items-center justify-center py-6">
+        <div class="glass-panel rounded-3xl p-6 sm:p-10 border-2 border-sky-200/90 shadow-xl max-w-lg w-full text-center relative overflow-hidden">
+          <div class="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-sky-400 via-indigo-500 to-orange-500"></div>
+          <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-sky-400 to-indigo-500 text-white flex items-center justify-center text-4xl mx-auto mb-5 animate-bounce shadow-lg shadow-sky-500/25">
+            🎮
+          </div>
+          <span class="px-3.5 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-slate-700 text-xs font-extrabold">
+            房間代碼：<span id="student-lobby-room" class="font-mono-code text-indigo-600 font-black">----</span>
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-3 mb-1">
+            歡迎，<span id="student-lobby-name" class="text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-orange-500">同學</span>！
+          </h2>
+          <p class="text-slate-600 text-sm mb-6">已成功連線至老師的教室，請等待老師進行分組與開始比賽。</p>
+
+          <!-- 對戰配對資訊卡 -->
+          <div class="bg-gradient-to-br from-slate-50 to-sky-50/70 rounded-2xl p-5 border border-sky-200/80 mb-6 shadow-inner">
+            <div class="text-xs font-extrabold text-sky-700 uppercase tracking-wider mb-3">本局對戰資訊</div>
+            <div class="flex items-center justify-around gap-2">
+              <div class="text-center">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-500 to-indigo-600 text-white font-black flex items-center justify-center mx-auto mb-1.5 text-lg shadow-md">我</div>
+                <div id="lobby-my-name" class="font-black text-slate-800 text-sm truncate max-w-[100px]">我</div>
+              </div>
+              <div class="text-2xl font-black text-amber-500 italic">VS</div>
+              <div class="text-center">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-rose-600 text-white font-black flex items-center justify-center mx-auto mb-1.5 text-lg shadow-md">敵</div>
+                <div id="lobby-opponent-name" class="font-black text-slate-600 text-sm truncate max-w-[110px]">等待配對中...</div>
+              </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-sky-200/70 flex justify-center gap-4 text-xs font-bold text-slate-600">
+              <span>模式：<strong id="lobby-game-mode" class="text-indigo-600">英文打字</strong></span>
+              <span>時間：<strong id="lobby-game-duration" class="text-orange-600">60 秒</strong></span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-center gap-2 text-xs text-slate-500 font-bold">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+            <span>畫面將由老師端自動切換開始，請雙手放在鍵盤上準備！</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 學生即時對戰畫面 (Active Battle View) -->
+      <div id="student-battle-view" class="hidden flex-1 flex flex-col justify-between max-w-4xl w-full mx-auto gap-4 py-2">
+        
+        <!-- 頂部：深色星空競技場計分板與發光拔河進度條 -->
+        <div class="arena-scoreboard rounded-3xl p-4 sm:p-6 border border-indigo-500/40 shadow-xl text-white">
+          <div class="flex items-center justify-between gap-2 mb-3.5">
+            <!-- 我方資訊 -->
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-400 to-indigo-600 text-white font-black flex items-center justify-center text-lg shadow-lg shadow-sky-500/30">我</div>
+              <div>
+                <div id="battle-my-name" class="font-black text-sky-200 text-sm sm:text-base">我方選手</div>
+                <div class="text-3xl sm:text-4xl font-mono-code font-black text-sky-400 leading-none mt-0.5 drop-shadow-[0_0_10px_rgba(56,189,248,0.5)]" id="battle-my-score">0</div>
+              </div>
+            </div>
+
+            <!-- 中央倒數計時器 -->
+            <div class="bg-slate-950/80 border border-amber-400/40 px-5 py-2 rounded-2xl text-center shadow-inner">
+              <div class="text-[10px] font-bold text-amber-200/80 uppercase tracking-widest">剩餘時間</div>
+              <div id="battle-timer" class="text-2xl sm:text-3xl font-mono-code font-black text-amber-400">60</div>
+            </div>
+
+            <!-- 對手資訊 -->
+            <div class="flex items-center gap-3 text-right">
+              <div>
+                <div id="battle-opp-name" class="font-black text-orange-200 text-sm sm:text-base">對手</div>
+                <div class="text-3xl sm:text-4xl font-mono-code font-black text-orange-400 leading-none mt-0.5 drop-shadow-[0_0_10px_rgba(251,146,60,0.5)]" id="battle-opp-score">0</div>
+              </div>
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-rose-600 text-white font-black flex items-center justify-center text-lg shadow-lg shadow-orange-500/30">敵</div>
+            </div>
+          </div>
+
+          <!-- 動態漸層發光拔河進度條 -->
+          <div class="relative w-full h-5 bg-gradient-to-r from-orange-500 to-rose-600 rounded-full overflow-hidden shadow-inner flex items-center border border-white/15">
+            <div id="battle-tug-bar" class="h-full bg-gradient-to-r from-indigo-500 via-sky-400 to-cyan-300 tug-transition tug-glow-blue flex items-center justify-end pr-1" style="width: 50%;">
+              <div class="w-3.5 h-3.5 rounded-full bg-white shadow-[0_0_8px_#fff]"></div>
+            </div>
+            <!-- 中線標記 -->
+            <div class="absolute inset-y-0 left-1/2 w-0.5 bg-white/70 z-10"></div>
+          </div>
+          <div class="flex justify-between text-[11px] font-bold text-slate-300 mt-1.5">
+            <span class="text-sky-300">⚡ 我方推進 ➔</span>
+            <span id="battle-status-hint" class="text-amber-300">勢均力敵！</span>
+            <span class="text-orange-300">⬅ 對手進攻 🔥</span>
+          </div>
+        </div>
+
+        <!-- 中央：立體按鍵字卡與打字輸入區 -->
+        <div id="typing-card" class="keycap-card rounded-3xl p-6 sm:p-10 border-2 border-indigo-200/90 flex flex-col items-center justify-center flex-1 relative overflow-hidden">
+          
+          <!-- 連擊 Combo 發光徽章 -->
+          <div id="combo-badge" class="hidden absolute top-4 right-4 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black text-sm shadow-md shadow-orange-500/30 animate-pop">
+            🔥 <span id="combo-count">0</span> 連擊！
+          </div>
+
+          <!-- 題目提示標籤 -->
+          <div id="typing-mode-hint" class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-extrabold tracking-wide mb-4 border border-indigo-100">
+            請輸入下方英文單字 (大小寫皆可自動判定)
+          </div>
+
+          <!-- 目標題目顯示區 -->
+          <div id="target-word-display" class="text-4xl sm:text-6xl font-black tracking-wider text-center mb-8 select-none leading-snug break-words max-w-full px-6 py-4 rounded-2xl bg-slate-50/90 border border-slate-200/80 shadow-inner">
+            apple
+          </div>
+
+          <!-- 輸入框 -->
+          <div class="w-full max-w-xl relative">
+            <input id="student-typing-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+              placeholder="請在這裡打字..."
+              class="w-full px-6 py-4 rounded-2xl border-2 border-sky-300 bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 focus:outline-none text-2xl sm:text-3xl font-bold text-center text-slate-800 shadow-md transition" />
+            <div id="input-helper-subtext" class="text-center mt-3 text-xs text-slate-500 font-bold">
+              💡 完整打對就會自動得分跳下一題！不用擔心按到大寫鍵喔！
+            </div>
+          </div>
+        </div>
+
+        <!-- 底部：個人即時數據列 -->
+        <div class="grid grid-cols-3 gap-3 sm:gap-4">
+          <div class="glass-panel rounded-2xl p-3.5 border border-sky-200/80 text-center shadow-sm">
+            <div class="text-xs font-bold text-slate-500">打字速度 (<span id="speed-unit-label">WPM</span>)</div>
+            <div id="stat-wpm" class="text-xl sm:text-2xl font-mono-code font-black text-indigo-700 mt-0.5">0</div>
+          </div>
+          <div class="glass-panel rounded-2xl p-3.5 border border-emerald-200/80 text-center shadow-sm">
+            <div class="text-xs font-bold text-slate-500">正確率</div>
+            <div id="stat-accuracy" class="text-xl sm:text-2xl font-mono-code font-black text-emerald-600 mt-0.5">100%</div>
+          </div>
+          <div class="glass-panel rounded-2xl p-3.5 border border-amber-200/80 text-center shadow-sm">
+            <div class="text-xs font-bold text-slate-500">最高連擊</div>
+            <div id="stat-max-combo" class="text-xl sm:text-2xl font-mono-code font-black text-orange-500 mt-0.5">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 學生賽後結算畫面 (Student Match End View) -->
+      <div id="student-result-view" class="hidden flex-1 flex flex-col items-center justify-center py-6">
+        <div class="glass-panel rounded-3xl p-6 sm:p-10 border-2 border-amber-200 shadow-2xl max-w-lg w-full text-center relative overflow-hidden">
+          <div class="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500"></div>
+          <div id="result-trophy-icon" class="text-6xl mb-3">🏆</div>
+          <h2 id="result-title" class="text-3xl sm:text-4xl font-black text-slate-900 mb-1">恭喜獲勝！</h2>
+          <p id="result-subtitle" class="text-slate-600 text-sm mb-6">太精彩了！你的手速無人能敵！</p>
+
+          <!-- 雙方分數對比 -->
+          <div class="grid grid-cols-2 gap-4 bg-slate-50/90 p-4 rounded-2xl border border-slate-200 mb-6">
+            <div class="p-3 rounded-xl bg-sky-50 border border-sky-200">
+              <div class="text-xs font-bold text-sky-700">我的最終得分</div>
+              <div id="res-my-score" class="text-3xl font-mono-code font-black text-indigo-900 mt-1">0</div>
+            </div>
+            <div class="p-3 rounded-xl bg-orange-50 border border-orange-200">
+              <div id="res-opp-label" class="text-xs font-bold text-orange-700">對手得分</div>
+              <div id="res-opp-score" class="text-3xl font-mono-code font-black text-rose-900 mt-1">0</div>
+            </div>
+          </div>
+
+          <!-- 個人詳細表現 -->
+          <div class="grid grid-cols-3 gap-2 mb-6 text-center">
+            <div class="p-2.5 rounded-xl bg-white border border-slate-200/80">
+              <div class="text-[11px] font-bold text-slate-500">完成題數</div>
+              <div id="res-words-done" class="text-lg font-black text-slate-800">0</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-white border border-slate-200/80">
+              <div class="text-[11px] font-bold text-slate-500">平均速度</div>
+              <div id="res-wpm" class="text-lg font-black text-indigo-600">0</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-white border border-slate-200/80">
+              <div class="text-[11px] font-bold text-slate-500">正確率</div>
+              <div id="res-acc" class="text-lg font-black text-emerald-600">100%</div>
+            </div>
+          </div>
+
+          <div id="solo-rematch-box" class="hidden mb-4">
+            <button onclick="startSoloDemoMode()" class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-700 hover:to-sky-600 text-white font-black text-sm shadow-md transition">
+              🔄 再挑戰一次電腦陪練員
+            </button>
+          </div>
+
+          <p id="result-wait-hint" class="text-xs text-slate-500 font-bold">請等待老師開啟下一回合或重新配對...</p>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== 老師端：賽後總結與 MVP 頒獎彈窗 ==================== -->
+  <div id="teacher-summary-modal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+        <div>
+          <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-black">本局對戰結算</span>
+          <h3 class="text-2xl font-black text-slate-900 mt-1">🎉 全班成績總覽與 MVP 榮譽榜</h3>
+        </div>
+        <button onclick="closeSummaryModal()" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold">✕</button>
+      </div>
+
+      <!-- 全班 MVP 卡片 -->
+      <div id="mvp-banner" class="bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 rounded-2xl p-5 text-white shadow-lg mb-5 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div class="text-5xl">👑</div>
+          <div>
+            <div class="text-xs font-black uppercase tracking-wider text-amber-100">本局最高分 MVP</div>
+            <div id="mvp-name" class="text-2xl sm:text-3xl font-black">尚未產生</div>
+            <div id="mvp-stats" class="text-xs font-bold text-amber-50 mt-0.5">得分：0 分 | 速度：0 WPM</div>
+          </div>
+        </div>
+        <div class="hidden sm:block text-right">
+          <span class="px-3 py-1.5 rounded-xl bg-white/20 font-black text-sm">全班第一名</span>
+        </div>
+      </div>
+
+      <!-- 完整成績排名表 -->
+      <div class="flex-1 overflow-y-auto border border-slate-200 rounded-2xl mb-6">
+        <table class="w-full text-left border-collapse">
+          <thead class="bg-slate-50 text-slate-600 text-xs font-extrabold uppercase sticky top-0">
+            <tr>
+              <th class="py-3 px-4">名次</th>
+              <th class="py-3 px-4">學生姓名</th>
+              <th class="py-3 px-4">對戰對手</th>
+              <th class="py-3 px-4 text-right">最終得分</th>
+              <th class="py-3 px-4 text-right">速度</th>
+              <th class="py-3 px-4 text-right">正確率</th>
+            </tr>
+          </thead>
+          <tbody id="summary-table-body" class="divide-y divide-slate-100 text-sm"></tbody>
+        </table>
+      </div>
+
+      <!-- 底部操作按鈕 -->
+      <div class="flex flex-wrap items-center justify-end gap-3">
+        <button onclick="rematchSamePairs()" class="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-black text-sm transition">
+          🔄 原班人馬再戰一局
+        </button>
+        <button onclick="rematchNewPairs()" class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm shadow-md transition">
+          🎲 重新隨機配對並準備下一局
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 自訂確認對話框 -->
+  <div id="custom-confirm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 text-center">
+      <div class="text-4xl mb-3">⚠️</div>
+      <h4 id="confirm-modal-title" class="text-lg font-black text-slate-900 mb-2">確定要離開房間嗎？</h4>
+      <p id="confirm-modal-desc" class="text-sm text-slate-500 mb-6">離開後目前的連線與對戰進度將會中斷。</p>
+      <div class="grid grid-cols-2 gap-3">
+        <button onclick="closeConfirmModal(false)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm">取消</button>
+        <button onclick="closeConfirmModal(true)" class="py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm">確定離開</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * =========================================================================
+     * 班級即時打字對戰系統 - 完整穩定版核心邏輯
+     * 支援雙 CDN 非同步載入 PeerJS、Web Audio API 音效、國小三年級中/英文題庫
+     * =========================================================================
+     */
+
+    // 全域錯誤監聽，避免白畫面且方便診斷
+    window.onerror = function (msg, url, lineNo) {
+      const banner = document.getElementById('global-error-banner');
+      if (banner) {
+        banner.textContent = '系統提示：發生執行錯誤 (' + msg + ' @ 第 ' + lineNo + ' 行)';
+        banner.classList.remove('hidden');
+      }
+      return false;
+    };
+
+    // 非同步載入 PeerJS (含雙 CDN 備援，不阻塞畫面渲染)
+    let peerJsPromise = null;
+    function ensurePeerJsLoaded() {
+      if (typeof window.Peer !== 'undefined') {
+        return Promise.resolve(window.Peer);
+      }
+      if (peerJsPromise) return peerJsPromise;
+
+      const cdns = [
+        'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js',
+        'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js'
+      ];
+
+      peerJsPromise = new Promise((resolve, reject) => {
+        let index = 0;
+        function tryLoadNext() {
+          if (index >= cdns.length) {
+            peerJsPromise = null;
+            reject(new Error('無法載入即時連線元件，請檢查網路連線或使用「單機模擬測試」。'));
+            return;
+          }
+          const script = document.createElement('script');
+          script.src = cdns[index++];
+          script.async = true;
+          script.onload = () => {
+            if (typeof window.Peer !== 'undefined') {
+              resolve(window.Peer);
+            } else {
+              tryLoadNext();
+            }
+          };
+          script.onerror = () => {
+            tryLoadNext();
+          };
+          document.head.appendChild(script);
+        }
+        tryLoadNext();
+      });
+
+      return peerJsPromise;
+    }
+
+    // 國小三年級適齡題庫 (英文全小寫基礎單字、中文常見詞語與簡單成語)
+    const DEFAULT_BANKS = {
+      en: [
+        "apple", "book", "cat", "dog", "fish", "milk", "blue", "red", "sun", "star",
+        "cake", "egg", "pen", "bag", "desk", "chair", "lion", "tiger", "bird", "duck",
+        "bear", "pig", "cow", "ant", "bee", "box", "bus", "car", "hat", "cup",
+        "ball", "tree", "moon", "water", "happy", "jump", "run", "swim", "sing", "dance",
+        "read", "draw", "look", "good", "nice", "boy", "girl", "mom", "dad", "home"
+      ],
+      zh: [
+        "快樂", "太陽", "學校", "老師", "同學", "鉛筆", "橡皮擦", "運動場", "圖書館", "星期天",
+        "好朋友", "動物園", "大自然", "冰淇淋", "西瓜汁", "一帆風順", "畫蛇添足", "守株待兔",
+        "對牛彈琴", "自言自語", "五顏六色", "七上八下", "開開心心", "平平安安", "高高興興"
+      ]
+    };
+
+    // 全域狀態管理
+    const state = {
+      role: null, // 'teacher' | 'student' | 'solo'
+      soundEnabled: true,
+      peer: null,
+      roomCode: '',
+      teacher: {
+        mode: 'en',
+        duration: 60,
+        wordBank: [...DEFAULT_BANKS.en],
+        students: {}, // id -> { id, name, conn, isBot, score, wordsDone, wpm, accuracy, combo, maxCombo }
+        pairings: [], // [{ id, p1Id, p2Id }]
+        isPlaying: false,
+        timeLeft: 60,
+        timerInterval: null,
+        botInterval: null
+      },
+      student: {
+        myId: '',
+        myName: '',
+        conn: null,
+        matchId: '',
+        opponentName: '等待配對中...',
+        mode: 'en',
+        duration: 60,
+        wordList: [...DEFAULT_BANKS.en],
+        currentIndex: 0,
+        score: 0,
+        oppScore: 0,
+        combo: 0,
+        maxCombo: 0,
+        wordsDone: 0,
+        totalKeystrokes: 0,
+        correctChars: 0,
+        isPlaying: false,
+        isComposing: false,
+        timeLeft: 60,
+        timerInterval: null,
+        soloBotInterval: null
+      }
+    };
+
+    // ==================== 音效引擎 (Web Audio API) ====================
+    let audioCtx = null;
+    function playTone(type) {
+      if (!state.soundEnabled) return;
+      try {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContextClass) return;
+          audioCtx = new AudioContextClass();
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+
+        if (type === 'key') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(520, now);
+          gain.gain.setValueAtTime(0.03, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+          osc.start(now);
+          osc.stop(now + 0.04);
+        } else if (type === 'score') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(587.33, now);
+          osc.frequency.setValueAtTime(880, now + 0.07);
+          gain.gain.setValueAtTime(0.11, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+          osc.start(now);
+          osc.stop(now + 0.2);
+        } else if (type === 'error') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(170, now);
+          gain.gain.setValueAtTime(0.07, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+          osc.start(now);
+          osc.stop(now + 0.14);
+        } else if (type === 'beep') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(440, now);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+          osc.start(now);
+          osc.stop(now + 0.14);
+        } else if (type === 'go') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(880, now);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        }
+      } catch (e) {
+        // 忽略瀏覽器音訊限制錯誤
+      }
+    }
+
+    function toggleSound() {
+      state.soundEnabled = !state.soundEnabled;
+      document.getElementById('sound-icon').textContent = state.soundEnabled ? '🔊' : '🔇';
+      showToast(state.soundEnabled ? '已開啟遊戲音效' : '已靜音', 'info');
+    }
+
+    // ==================== 通用 UI 輔助函式 ====================
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const colors = {
+        info: 'bg-slate-900 text-white border-slate-700',
+        success: 'bg-emerald-600 text-white border-emerald-500',
+        warning: 'bg-amber-500 text-white border-amber-400',
+        error: 'bg-rose-600 text-white border-rose-500'
+      };
+      toast.className = `pointer-events-auto px-4 py-3 rounded-2xl shadow-xl border text-sm font-bold flex items-center gap-2 transition-all duration-300 ${colors[type] || colors.info}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-10px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    function setConnectionStatus(status, text) {
+      const dot = document.getElementById('connection-dot');
+      const label = document.getElementById('connection-text');
+      const styles = {
+        offline: 'bg-slate-400',
+        connecting: 'bg-amber-400 animate-pulse',
+        online: 'bg-emerald-500',
+        error: 'bg-rose-500'
+      };
+      dot.className = `w-2.5 h-2.5 rounded-full ${styles[status] || styles.offline}`;
+      label.textContent = text;
+    }
+
+    function switchMainView(viewId) {
+      ['view-entry', 'view-teacher', 'view-student'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      document.getElementById(viewId).classList.remove('hidden');
+      document.getElementById('btn-home').classList.toggle('hidden', viewId === 'view-entry');
+    }
+
+    function confirmReturnHome() {
+      document.getElementById('custom-confirm-modal').classList.remove('hidden');
+      document.getElementById('custom-confirm-modal').classList.add('flex');
+    }
+
+    function closeConfirmModal(confirmed) {
+      const modal = document.getElementById('custom-confirm-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      if (confirmed) {
+        cleanupAllSessions();
+        switchMainView('view-entry');
+        setConnectionStatus('offline', '待機中');
+      }
+    }
+
+    function cleanupAllSessions() {
+      clearInterval(state.teacher.timerInterval);
+      clearInterval(state.teacher.botInterval);
+      clearInterval(state.student.timerInterval);
+      clearInterval(state.student.soloBotInterval);
+      if (state.peer) {
+        try { state.peer.destroy(); } catch (e) {}
+        state.peer = null;
+      }
+      state.role = null;
+      state.teacher.students = {};
+      state.teacher.pairings = {};
+      state.teacher.pairings = [];
+      state.teacher.isPlaying = false;
+      state.student.isPlaying = false;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function formatSeconds(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function copyRoomCode() {
+      const code = state.roomCode;
+      if (!code) return;
+      const temp = document.createElement('textarea');
+      temp.value = code;
+      document.body.appendChild(temp);
+      temp.select();
+      try {
+        document.execCommand('copy');
+        showToast(`已複製房間代碼：${code}`, 'success');
+      } catch (e) {
+        showToast(`房間代碼：${code}`, 'info');
+      }
+      document.body.removeChild(temp);
+    }
+
+    // ==================== 老師端邏輯 (Teacher Host) ====================
+    async function initTeacherRole() {
+      state.role = 'teacher';
+      switchMainView('view-teacher');
+      resetDefaultWordBank();
+      renderTeacherStudentsAndPairings();
+      setConnectionStatus('connecting', '正在建立房間...');
+
+      try {
+        const PeerClass = await ensurePeerJsLoaded();
+        createTeacherPeerRoom(PeerClass);
+      } catch (err) {
+        setConnectionStatus('warning', '離線單機模式');
+        state.roomCode = String(Math.floor(1000 + Math.random() * 9000));
+        document.getElementById('teacher-room-code').textContent = state.roomCode;
+        showToast('目前為離線環境，可使用「新增虛擬學生」進行演示', 'warning');
+      }
+    }
+
+    function createTeacherPeerRoom(PeerClass) {
+      const code = String(Math.floor(1000 + Math.random() * 9000));
+      const peerId = `typing-battle-room-${code}`;
+
+      try {
+        const peer = new PeerClass(peerId, { debug: 0 });
+        state.peer = peer;
+
+        peer.on('open', () => {
+          state.roomCode = code;
+          document.getElementById('teacher-room-code').textContent = code;
+          setConnectionStatus('online', `房間已開啟 (${code})`);
+          showToast(`房間 ${code} 建立成功！`, 'success');
+        });
+
+        peer.on('connection', (conn) => {
+          conn.on('data', (data) => handleTeacherReceiveData(conn, data));
+          conn.on('close', () => handleTeacherStudentDisconnect(conn.peer));
+          conn.on('error', () => handleTeacherStudentDisconnect(conn.peer));
+        });
+
+        peer.on('error', (err) => {
+          if (err && err.type === 'unavailable-id') {
+            peer.destroy();
+            createTeacherPeerRoom(PeerClass);
+          } else {
+            setConnectionStatus('error', '連線異常');
+            showToast('P2P 連線發生異常，可使用虛擬學生測試', 'warning');
+          }
+        });
+      } catch (e) {
+        setConnectionStatus('error', '建立失敗');
+      }
+    }
+
+    function handleTeacherReceiveData(conn, data) {
+      if (!data || !data.type) return;
+
+      if (data.type === 'join') {
+        const sid = conn.peer;
+        const cleanName = (data.name || '無名選手').trim().slice(0, 12);
+        state.teacher.students[sid] = {
+          id: sid,
+          name: cleanName,
+          conn: conn,
+          isBot: false,
+          score: 0,
+          wordsDone: 0,
+          wpm: 0,
+          accuracy: 100,
+          combo: 0,
+          maxCombo: 0
+        };
+        showToast(`🎉 ${cleanName} 加入了教室！`, 'success');
+        renderTeacherStudentsAndPairings();
+        syncLobbyInfoToAllStudents();
+      } else if (data.type === 'progress') {
+        const st = state.teacher.students[conn.peer];
+        if (st && state.teacher.isPlaying) {
+          st.score = data.score || 0;
+          st.wordsDone = data.wordsDone || 0;
+          st.wpm = data.wpm || 0;
+          st.accuracy = data.accuracy ?? 100;
+          st.combo = data.combo || 0;
+          st.maxCombo = Math.max(st.maxCombo, st.combo);
+
+          // 同步最新分數給該生的對戰對手
+          const opponent = getOpponentOfStudent(st.id);
+          if (opponent && opponent.conn && opponent.conn.open) {
+            opponent.conn.send({
+              type: 'opponent_score',
+              oppScore: st.score
+            });
+          }
+          updateTeacherLiveArenaUI();
+        }
+      }
+    }
+
+    function handleTeacherStudentDisconnect(sid) {
+      const st = state.teacher.students[sid];
+      if (st) {
+        showToast(`${st.name} 已離開房間`, 'warning');
+        delete state.teacher.students[sid];
+        renderTeacherStudentsAndPairings();
+      }
+    }
+
+    function setGameMode(mode) {
+      state.teacher.mode = mode;
+      const btnEn = document.getElementById('mode-btn-en');
+      const btnZh = document.getElementById('mode-btn-zh');
+      if (mode === 'en') {
+        btnEn.className = 'py-3 px-4 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-black text-sm transition flex items-center justify-center gap-2 shadow-sm';
+        btnZh.className = 'py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-black text-sm transition flex items-center justify-center gap-2';
+      } else {
+        btnZh.className = 'py-3 px-4 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-black text-sm transition flex items-center justify-center gap-2 shadow-sm';
+        btnEn.className = 'py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-black text-sm transition flex items-center justify-center gap-2';
+      }
+      resetDefaultWordBank();
+      syncLobbyInfoToAllStudents();
+    }
+
+    function setDuration(sec) {
+      const validSec = Math.max(15, Math.min(600, sec || 60));
+      state.teacher.duration = validSec;
+      document.querySelectorAll('.dur-btn').forEach(btn => {
+        const d = parseInt(btn.getAttribute('data-dur'), 10);
+        if (d === validSec) {
+          btn.className = 'dur-btn py-2.5 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-black text-sm';
+        } else {
+          btn.className = 'dur-btn py-2.5 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm';
+        }
+      });
+      syncLobbyInfoToAllStudents();
+    }
+
+    function resetDefaultWordBank() {
+      const list = DEFAULT_BANKS[state.teacher.mode];
+      const editor = document.getElementById('word-bank-editor');
+      editor.value = list.join('\n');
+      updateWordBankFromEditor();
+    }
+
+    function updateWordBankFromEditor() {
+      const raw = document.getElementById('word-bank-editor').value;
+      const lines = raw
+        .split('\n')
+        .map(l => state.teacher.mode === 'en' ? l.trim().toLowerCase() : l.trim())
+        .filter(l => l.length > 0);
+      state.teacher.wordBank = lines.length > 0 ? lines : [...DEFAULT_BANKS[state.teacher.mode]];
+      document.getElementById('word-count-label').textContent = `共 ${state.teacher.wordBank.length} 題`;
+    }
+
+    document.getElementById('word-bank-editor').addEventListener('input', updateWordBankFromEditor);
+
+    // 新增虛擬學生方便老師單機演示或湊偶數
+    const BOT_NAMES = ['🤖 機器人小智', '🤖 機器人小美', '🤖 機器人阿寶', '🤖 機器人琪琪', '🤖 機器人皮卡', '🤖 機器人多啦'];
+    function addSimulatedStudent() {
+      const existingCount = Object.keys(state.teacher.students).length;
+      const botId = `bot-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      const botName = BOT_NAMES[existingCount % BOT_NAMES.length] + ` #${existingCount + 1}`;
+      state.teacher.students[botId] = {
+        id: botId,
+        name: botName,
+        conn: null,
+        isBot: true,
+        score: 0,
+        wordsDone: 0,
+        wpm: 0,
+        accuracy: 100,
+        combo: 0,
+        maxCombo: 0
+      };
+      renderTeacherStudentsAndPairings();
+      showToast(`已新增 ${botName}`, 'info');
+    }
+
+    // 自動兩兩隨機配對
+    function autoPairStudents() {
+      const realStudents = Object.values(state.teacher.students).filter(s => !s.isBot);
+      const existingBots = Object.values(state.teacher.students).filter(s => s.isBot);
+      let pool = [...realStudents, ...existingBots];
+
+      if (pool.length === 0) {
+        showToast('目前尚無學生加入，請先等待學生加入或新增虛擬學生！', 'warning');
+        return;
+      }
+
+      // 若為奇數人，自動補一位電腦陪練員
+      if (pool.length % 2 === 1) {
+        const botId = `bot-auto-${Date.now()}`;
+        const botObj = {
+          id: botId,
+          name: '🤖 電腦陪練員',
+          conn: null,
+          isBot: true,
+          score: 0,
+          wordsDone: 0,
+          wpm: 0,
+          accuracy: 100,
+          combo: 0,
+          maxCombo: 0
+        };
+        state.teacher.students[botId] = botObj;
+        pool.push(botObj);
+      }
+
+      // 洗牌隨機分組
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+
+      const newPairings = [];
+      for (let i = 0; i < pool.length; i += 2) {
+        newPairings.push({
+          id: `match-${i / 2 + 1}`,
+          p1Id: pool[i].id,
+          p2Id: pool[i + 1] ? pool[i + 1].id : ''
+        });
+      }
+      state.teacher.pairings = newPairings;
+      renderTeacherStudentsAndPairings();
+      syncLobbyInfoToAllStudents();
+      showToast(`已完成 ${newPairings.length} 組兩兩配對！`, 'success');
+    }
+
+    function addEmptyMatchSlot() {
+      state.teacher.pairings.push({
+        id: `match-${Date.now()}`,
+        p1Id: '',
+        p2Id: ''
+      });
+      renderTeacherStudentsAndPairings();
+    }
+
+    function removeMatchSlot(idx) {
+      state.teacher.pairings.splice(idx, 1);
+      renderTeacherStudentsAndPairings();
+      syncLobbyInfoToAllStudents();
+    }
+
+    function updateMatchSlotPlayer(idx, slotKey, studentId) {
+      if (state.teacher.pairings[idx]) {
+        state.teacher.pairings[idx][slotKey] = studentId;
+        renderTeacherStudentsAndPairings();
+        syncLobbyInfoToAllStudents();
+      }
+    }
+
+    function renderTeacherStudentsAndPairings() {
+      const studentsArr = Object.values(state.teacher.students);
+      document.getElementById('teacher-student-count').textContent = studentsArr.length;
+      document.getElementById('lobby-online-count').textContent = studentsArr.length;
+
+      // 渲染在線學生標籤
+      const chipsEl = document.getElementById('lobby-students-chips');
+      if (studentsArr.length === 0) {
+        chipsEl.innerHTML = '<span class="text-xs text-slate-400 italic self-center">尚無學生連線，請學生輸入房號加入...</span>';
+      } else {
+        chipsEl.innerHTML = studentsArr.map(s => `
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold ${s.isBot ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-white text-indigo-800 border border-indigo-200 shadow-sm'}">
+            <span>${s.isBot ? '🤖' : '🧑‍🎓'}</span>
+            <span>${escapeHtml(s.name)}</span>
+          </span>
+        `).join('');
+      }
+
+      // 渲染配對列表
+      const listEl = document.getElementById('teacher-pairings-list');
+      if (state.teacher.pairings.length === 0) {
+        listEl.innerHTML = `
+          <div class="text-center py-10 border-2 border-dashed border-indigo-200/80 bg-white/50 rounded-2xl text-slate-400 text-sm">
+            學生加入後，請點擊右上角「🎲 自動隨機配對」建立對戰組合
+          </div>`;
+        return;
+      }
+
+      const buildOptions = (selectedId) => {
+        let opts = '<option value="">-- 選擇選手 --</option>';
+        studentsArr.forEach(s => {
+          const sel = s.id === selectedId ? 'selected' : '';
+          opts += `<option value="${escapeHtml(s.id)}" ${sel}>${escapeHtml(s.name)}</option>`;
+        });
+        return opts;
+      };
+
+      listEl.innerHTML = state.teacher.pairings.map((pair, idx) => `
+        <div class="flex items-center gap-2 p-3 rounded-2xl bg-white border border-indigo-100 shadow-sm">
+          <span class="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-black text-xs shrink-0">第 ${idx + 1} 組</span>
+          <select onchange="updateMatchSlotPlayer(${idx}, 'p1Id', this.value)" class="flex-1 min-w-0 px-2.5 py-2 rounded-xl border border-sky-200 bg-sky-50/50 text-sm font-bold text-slate-800 focus:outline-none">
+            ${buildOptions(pair.p1Id)}
+          </select>
+          <span class="font-black text-amber-500 text-sm px-1">VS</span>
+          <select onchange="updateMatchSlotPlayer(${idx}, 'p2Id', this.value)" class="flex-1 min-w-0 px-2.5 py-2 rounded-xl border border-orange-200 bg-orange-50/50 text-sm font-bold text-slate-800 focus:outline-none">
+            ${buildOptions(pair.p2Id)}
+          </select>
+          <button onclick="removeMatchSlot(${idx})" class="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 text-xs font-bold" title="刪除此組">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function getOpponentOfStudent(studentId) {
+      for (const pair of state.teacher.pairings) {
+        if (pair.p1Id === studentId) return state.teacher.students[pair.p2Id] || null;
+        if (pair.p2Id === studentId) return state.teacher.students[pair.p1Id] || null;
+      }
+      return null;
+    }
+
+    function syncLobbyInfoToAllStudents() {
+      Object.values(state.teacher.students).forEach(st => {
+        if (st.conn && st.conn.open) {
+          const opp = getOpponentOfStudent(st.id);
+          st.conn.send({
+            type: 'lobby_update',
+            mode: state.teacher.mode,
+            duration: state.teacher.duration,
+            opponentName: opp ? opp.name : '等待老師配對中...'
+          });
+        }
+      });
+    }
+
+    // 老師端開始對戰
+    function teacherStartMatch() {
+      if (state.teacher.pairings.length === 0) {
+        if (Object.keys(state.teacher.students).length > 0) {
+          autoPairStudents();
+        } else {
+          showToast('請先等待學生加入，或點擊「新增虛擬學生」測試！', 'warning');
+          return;
+        }
+      }
+
+      updateWordBankFromEditor();
+      // 產生打亂順序的題庫
+      const shuffledBank = [...state.teacher.wordBank].sort(() => Math.random() - 0.5);
+
+      // 重置所有學生分數
+      Object.values(state.teacher.students).forEach(s => {
+        s.score = 0;
+        s.wordsDone = 0;
+        s.wpm = 0;
+        s.accuracy = 100;
+        s.combo = 0;
+        s.maxCombo = 0;
+      });
+
+      // 廣播開始指令給所有連線學生
+      state.teacher.pairings.forEach((pair, idx) => {
+        const p1 = state.teacher.students[pair.p1Id];
+        const p2 = state.teacher.students[pair.p2Id];
+        if (p1 && p1.conn && p1.conn.open) {
+          p1.conn.send({
+            type: 'start_match',
+            matchId: pair.id || `m-${idx}`,
+            opponentName: p2 ? p2.name : '自主挑戰模式',
+            mode: state.teacher.mode,
+            duration: state.teacher.duration,
+            wordList: shuffledBank
+          });
+        }
+        if (p2 && p2.conn && p2.conn.open) {
+          p2.conn.send({
+            type: 'start_match',
+            matchId: pair.id || `m-${idx}`,
+            opponentName: p1 ? p1.name : '自主挑戰模式',
+            mode: state.teacher.mode,
+            duration: state.teacher.duration,
+            wordList: shuffledBank
+          });
+        }
+      });
+
+      // 切換老師端為即時戰況轉播畫面
+      document.getElementById('teacher-setup-area').classList.add('hidden');
+      document.getElementById('teacher-live-arena').classList.remove('hidden');
+      document.getElementById('teacher-live-arena').classList.add('flex');
+      document.getElementById('btn-start-match').classList.add('hidden');
+      document.getElementById('btn-add-bot-student').classList.add('hidden');
+      document.getElementById('btn-stop-match').classList.remove('hidden');
+      document.getElementById('teacher-status-pill').textContent = '🔥 對戰進行中';
+      document.getElementById('teacher-status-pill').className = 'px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-extrabold border border-rose-200 animate-pulse';
+
+      document.getElementById('live-mode-label').textContent =
+        state.teacher.mode === 'en' ? '英文單字 (三年級全小寫)' : '中文詞語 (三年級適齡)';
+      document.getElementById('live-match-count').textContent = `${state.teacher.pairings.length} 組`;
+
+      state.teacher.timeLeft = state.teacher.duration;
+      document.getElementById('teacher-timer-display').textContent = formatSeconds(state.teacher.timeLeft);
+      updateTeacherLiveArenaUI();
+
+      // 啟動 3-2-1 同步倒數
+      runCountdownOverlay(() => {
+        state.teacher.isPlaying = true;
+        startTeacherTimers();
+      });
+    }
+
+    function startTeacherTimers() {
+      clearInterval(state.teacher.timerInterval);
+      clearInterval(state.teacher.botInterval);
+
+      // 主計時器
+      state.teacher.timerInterval = setInterval(() => {
+        state.teacher.timeLeft--;
+        document.getElementById('teacher-timer-display').textContent = formatSeconds(Math.max(0, state.teacher.timeLeft));
+
+        if (state.teacher.timeLeft <= 0) {
+          finishTeacherMatch();
+        }
+      }, 1000);
+
+      // 虛擬學生自動打字模擬器 (國小三年級適中速度)
+      state.teacher.botInterval = setInterval(() => {
+        if (!state.teacher.isPlaying) return;
+        let updated = false;
+        Object.values(state.teacher.students).forEach(st => {
+          if (st.isBot && Math.random() < 0.42) {
+            st.wordsDone += 1;
+            st.combo += 1;
+            st.maxCombo = Math.max(st.maxCombo, st.combo);
+            st.score += 10 + Math.min(10, st.combo);
+            const elapsedMin = Math.max(0.1, (state.teacher.duration - state.teacher.timeLeft) / 60);
+            st.wpm = Math.round(st.wordsDone / elapsedMin);
+            st.accuracy = 96;
+            updated = true;
+
+            const opp = getOpponentOfStudent(st.id);
+            if (opp && opp.conn && opp.conn.open) {
+              opp.conn.send({ type: 'opponent_score', oppScore: st.score });
+            }
+          }
+        });
+        if (updated) updateTeacherLiveArenaUI();
+      }, 1600);
+    }
+
+    function updateTeacherLiveArenaUI() {
+      const cardsEl = document.getElementById('teacher-match-cards');
+      cardsEl.innerHTML = state.teacher.pairings.map((pair, idx) => {
+        const p1 = state.teacher.students[pair.p1Id] || { name: '空缺', score: 0, wpm: 0 };
+        const p2 = state.teacher.students[pair.p2Id] || { name: '空缺', score: 0, wpm: 0 };
+        const total = p1.score + p2.score;
+        const p1Pct = total === 0 ? 50 : Math.min(88, Math.max(12, Math.round((p1.score / total) * 100)));
+
+        return `
+          <div class="glass-panel rounded-2xl p-4 border border-indigo-100 shadow-sm">
+            <div class="flex items-center justify-between text-xs font-extrabold text-slate-400 mb-2">
+              <span>第 ${idx + 1} 組對決</span>
+              <span>${p1.score === p2.score ? '平手拉鋸中' : (p1.score > p2.score ? `領先 +${p1.score - p2.score}` : `領先 +${p2.score - p1.score}`)}</span>
+            </div>
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <div class="min-w-0">
+                <div class="font-black text-sky-700 text-sm truncate">${escapeHtml(p1.name)}</div>
+                <div class="text-2xl font-mono-code font-black text-slate-900">${p1.score} <span class="text-xs font-bold text-slate-400">分</span></div>
+              </div>
+              <div class="text-sm font-black text-amber-500">VS</div>
+              <div class="min-w-0 text-right">
+                <div class="font-black text-orange-600 text-sm truncate">${escapeHtml(p2.name)}</div>
+                <div class="text-2xl font-mono-code font-black text-slate-900">${p2.score} <span class="text-xs font-bold text-slate-400">分</span></div>
+              </div>
+            </div>
+            <div class="w-full h-3 bg-gradient-to-r from-orange-500 to-rose-500 rounded-full overflow-hidden flex">
+              <div class="h-full bg-gradient-to-r from-indigo-500 to-sky-400 tug-transition" style="width: ${p1Pct}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // 更新全班即時積分排行榜
+      const sorted = Object.values(state.teacher.students).sort((a, b) => b.score - a.score);
+      const lbEl = document.getElementById('teacher-live-leaderboard');
+      lbEl.innerHTML = sorted.map((st, idx) => {
+        const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+        return `
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/90 border border-slate-100 shadow-2xs">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="w-7 text-center font-black text-sm">${medal}</span>
+              <span class="font-bold text-slate-800 text-sm truncate">${escapeHtml(st.name)}</span>
+            </div>
+            <div class="text-right shrink-0">
+              <span class="font-mono-code font-black text-indigo-600 text-base">${st.score}</span>
+              <span class="text-[11px] font-bold text-slate-400 ml-1">分</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function teacherForceStopMatch() {
+      finishTeacherMatch();
+    }
+
+    function finishTeacherMatch() {
+      state.teacher.isPlaying = false;
+      clearInterval(state.teacher.timerInterval);
+      clearInterval(state.teacher.botInterval);
+      playTone('go');
+
+      // 通知所有學生比賽結束
+      state.teacher.pairings.forEach(pair => {
+        const p1 = state.teacher.students[pair.p1Id];
+        const p2 = state.teacher.students[pair.p2Id];
+        if (p1 && p1.conn && p1.conn.open) {
+          p1.conn.send({ type: 'end_match', finalOppScore: p2 ? p2.score : 0 });
+        }
+        if (p2 && p2.conn && p2.conn.open) {
+          p2.conn.send({ type: 'end_match', finalOppScore: p1 ? p1.score : 0 });
+        }
+      });
+
+      document.getElementById('btn-stop-match').classList.add('hidden');
+      document.getElementById('btn-start-match').classList.remove('hidden');
+      document.getElementById('btn-add-bot-student').classList.remove('hidden');
+      document.getElementById('teacher-status-pill').textContent = '本局已結束';
+      document.getElementById('teacher-status-pill').className = 'px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold border border-emerald-200';
+
+      openTeacherSummaryModal();
+    }
+
+    function openTeacherSummaryModal() {
+      const sorted = Object.values(state.teacher.students).sort((a, b) => b.score - a.score);
+      const mvp = sorted[0];
+
+      if (mvp) {
+        document.getElementById('mvp-name').textContent = mvp.name;
+        const unit = state.teacher.mode === 'en' ? 'WPM' : '字/分';
+        document.getElementById('mvp-stats').textContent = `最終得分：${mvp.score} 分 ｜ 速度：${mvp.wpm} ${unit} ｜ 正確率：${mvp.accuracy}%`;
+      }
+
+      const tbody = document.getElementById('summary-table-body');
+      const unit = state.teacher.mode === 'en' ? 'WPM' : '字/分';
+      tbody.innerHTML = sorted.map((st, idx) => {
+        const opp = getOpponentOfStudent(st.id);
+        const rankBadge = idx === 0 ? '🥇 1' : idx === 1 ? '🥈 2' : idx === 2 ? '🥉 3' : `${idx + 1}`;
+        return `
+          <tr class="${idx === 0 ? 'bg-amber-50/60 font-bold' : ''}">
+            <td class="py-3 px-4 font-black text-slate-700">${rankBadge}</td>
+            <td class="py-3 px-4 font-bold text-slate-900">${escapeHtml(st.name)}</td>
+            <td class="py-3 px-4 text-slate-500 text-xs">${opp ? escapeHtml(opp.name) : '-'}</td>
+            <td class="py-3 px-4 text-right font-mono-code font-black text-indigo-600">${st.score} 分</td>
+            <td class="py-3 px-4 text-right font-mono-code text-slate-700">${st.wpm} ${unit}</td>
+            <td class="py-3 px-4 text-right font-mono-code text-emerald-600">${st.accuracy}%</td>
+          </tr>
+        `;
+      }).join('');
+
+      const modal = document.getElementById('teacher-summary-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeSummaryModal() {
+      const modal = document.getElementById('teacher-summary-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function resetTeacherBackToLobby() {
+      closeSummaryModal();
+      document.getElementById('teacher-live-arena').classList.add('hidden');
+      document.getElementById('teacher-live-arena').classList.remove('flex');
+      document.getElementById('teacher-setup-area').classList.remove('hidden');
+      document.getElementById('teacher-status-pill').textContent = '等待配對與開始';
+      document.getElementById('teacher-status-pill').className = 'px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-extrabold border border-amber-200';
+      Object.values(state.teacher.students).forEach(st => {
+        if (st.conn && st.conn.open) {
+          st.conn.send({ type: 'return_lobby' });
+        }
+      });
+      syncLobbyInfoToAllStudents();
+    }
+
+    function rematchSamePairs() {
+      resetTeacherBackToLobby();
+      showToast('已保留原分組，隨時可按「開始倒數對戰」！', 'info');
+    }
+
+    function rematchNewPairs() {
+      resetTeacherBackToLobby();
+      autoPairStudents();
+    }
+
+    // ==================== 學生端與單機體驗邏輯 ====================
+    async function initStudentRole() {
+      const codeInput = document.getElementById('input-room-code').value.trim();
+      const nameInput = document.getElementById('input-student-name').value.trim();
+
+      if (!/^\d{4}$/.test(codeInput)) {
+        showToast('請輸入正確的 4 位數房間代碼！', 'warning');
+        return;
+      }
+      if (!nameInput) {
+        showToast('請輸入你的座號或姓名！', 'warning');
+        return;
+      }
+
+      state.role = 'student';
+      state.roomCode = codeInput;
+      state.student.myName = nameInput;
+
+      const joinBtn = document.getElementById('btn-join-room');
+      joinBtn.disabled = true;
+      joinBtn.textContent = '正在連線至教室...';
+      setConnectionStatus('connecting', '連線中...');
+
+      try {
+        const PeerClass = await ensurePeerJsLoaded();
+        const peer = new PeerClass({ debug: 0 });
+        state.peer = peer;
+
+        peer.on('open', (myId) => {
+          state.student.myId = myId;
+          const hostId = `typing-battle-room-${codeInput}`;
+          const conn = peer.connect(hostId, { reliable: true });
+          state.student.conn = conn;
+
+          conn.on('open', () => {
+            joinBtn.disabled = false;
+            joinBtn.innerHTML = '<span>加入房間</span><span>🚀</span>';
+            setConnectionStatus('online', `已連上房間 ${codeInput}`);
+            conn.send({ type: 'join', name: nameInput });
+
+            switchMainView('view-student');
+            showStudentSubView('student-lobby-view');
+            document.getElementById('student-lobby-room').textContent = codeInput;
+            document.getElementById('student-lobby-name').textContent = nameInput;
+            document.getElementById('lobby-my-name').textContent = nameInput;
+            showToast('成功加入教室！請等待老師配對', 'success');
+          });
+
+          conn.on('data', (data) => handleStudentReceiveData(data));
+
+          conn.on('close', () => {
+            setConnectionStatus('error', '與老師斷開連線');
+            showToast('與老師端連線已中斷', 'error');
+          });
+
+          conn.on('error', () => {
+            joinBtn.disabled = false;
+            joinBtn.innerHTML = '<span>加入房間</span><span>🚀</span>';
+            setConnectionStatus('error', '找不到房間');
+            showToast('找不到該房間代碼，請確認老師是否已開房！', 'error');
+          });
+        });
+
+        peer.on('error', () => {
+          joinBtn.disabled = false;
+          joinBtn.innerHTML = '<span>加入房間</span><span>🚀</span>';
+          setConnectionStatus('error', '連線失敗');
+          showToast('無法連線至房間，請檢查房號是否正確！', 'error');
+        });
+      } catch (err) {
+        joinBtn.disabled = false;
+        joinBtn.innerHTML = '<span>加入房間</span><span>🚀</span>';
+        setConnectionStatus('error', '網路連線受限');
+        showToast(err.message || '無法連線至伺服器', 'error');
+      }
+    }
+
+    function handleStudentReceiveData(data) {
+      if (!data || !data.type) return;
+
+      if (data.type === 'lobby_update') {
+        state.student.mode = data.mode || 'en';
+        state.student.duration = data.duration || 60;
+        state.student.opponentName = data.opponentName || '等待配對中...';
+
+        document.getElementById('lobby-opponent-name').textContent = state.student.opponentName;
+        document.getElementById('lobby-game-mode').textContent = state.student.mode === 'en' ? '英文單字' : '中文詞語';
+        document.getElementById('lobby-game-duration').textContent = `${state.student.duration} 秒`;
+      } else if (data.type === 'start_match') {
+        state.student.matchId = data.matchId;
+        state.student.opponentName = data.opponentName || '對手';
+        state.student.mode = data.mode || 'en';
+        state.student.duration = data.duration || 60;
+        state.student.wordList = (data.wordList && data.wordList.length > 0) ? data.wordList : [...DEFAULT_BANKS[state.student.mode]];
+
+        prepareStudentBattleArena();
+        runCountdownOverlay(() => {
+          startStudentGameplay();
+        });
+      } else if (data.type === 'opponent_score') {
+        state.student.oppScore = data.oppScore || 0;
+        updateStudentScoreUI();
+      } else if (data.type === 'end_match') {
+        if (typeof data.finalOppScore === 'number') {
+          state.student.oppScore = data.finalOppScore;
+        }
+        finishStudentGameplay();
+      } else if (data.type === 'return_lobby') {
+        showStudentSubView('student-lobby-view');
+      }
+    }
+
+    // 單機模擬測試模式 (學生 vs 電腦陪練員)
+    function startSoloDemoMode() {
+      cleanupAllSessions();
+      state.role = 'solo';
+      state.student.myName = document.getElementById('input-student-name').value.trim() || '三年級小選手';
+      state.student.opponentName = '🤖 電腦陪練員';
+      state.student.mode = 'en';
+      state.student.duration = 45;
+      state.student.wordList = [...DEFAULT_BANKS.en].sort(() => Math.random() - 0.5);
+
+      switchMainView('view-student');
+      setConnectionStatus('online', '單機模擬對戰中');
+      prepareStudentBattleArena();
+
+      runCountdownOverlay(() => {
+        startStudentGameplay();
+        state.student.soloBotInterval = setInterval(() => {
+          if (!state.student.isPlaying) return;
+          if (Math.random() < 0.48) {
+            state.student.oppScore += 12;
+            updateStudentScoreUI();
+          }
+        }, 1600);
+      });
+    }
+
+    function showStudentSubView(subId) {
+      ['student-lobby-view', 'student-battle-view', 'student-result-view'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      document.getElementById(subId).classList.remove('hidden');
+    }
+
+    // 3-2-1 同步倒數遮罩
+    function runCountdownOverlay(onComplete) {
+      const overlay = document.getElementById('countdown-overlay');
+      const numEl = document.getElementById('countdown-number');
+      const subEl = document.getElementById('countdown-subtitle');
+
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+
+      let count = 3;
+      numEl.textContent = count;
+      subEl.textContent = '準備好你的雙手！';
+      playTone('beep');
+
+      const iv = setInterval(() => {
+        count--;
+        if (count > 0) {
+          numEl.textContent = count;
+          playTone('beep');
+        } else if (count === 0) {
+          numEl.textContent = 'GO!';
+          subEl.textContent = '開始打字衝刺！';
+          playTone('go');
+        } else {
+          clearInterval(iv);
+          overlay.classList.add('hidden');
+          overlay.classList.remove('flex');
+          if (onComplete) onComplete();
+        }
+      }, 850);
+    }
+
+    // 準備學生端對戰畫面
+    function prepareStudentBattleArena() {
+      const st = state.student;
+      st.currentIndex = 0;
+      st.score = 0;
+      st.oppScore = 0;
+      st.combo = 0;
+      st.maxCombo = 0;
+      st.wordsDone = 0;
+      st.totalKeystrokes = 0;
+      st.correctChars = 0;
+      st.timeLeft = st.duration;
+      st.isComposing = false;
+
+      showStudentSubView('student-battle-view');
+      document.getElementById('battle-my-name').textContent = st.myName;
+      document.getElementById('battle-opp-name').textContent = st.opponentName;
+      document.getElementById('battle-timer').textContent = st.duration;
+      document.getElementById('speed-unit-label').textContent = st.mode === 'en' ? 'WPM' : '字/分';
+      document.getElementById('combo-badge').classList.add('hidden');
+
+      const modeHintEl = document.getElementById('typing-mode-hint');
+      const helperSubEl = document.getElementById('input-helper-subtext');
+      if (st.mode === 'en') {
+        modeHintEl.textContent = '🔤 請輸入下方英文單字 (大小寫皆可自動判定)';
+        helperSubEl.textContent = '💡 完整打對就會自動得分跳下一題！不用擔心按到大寫鍵喔！';
+      } else {
+        modeHintEl.textContent = '🀄 請輸入下方中文詞語 (選字後按 Enter 送出)';
+        helperSubEl.textContent = '💡 注音選字完成後按 Enter 確認，完整相符即自動得分跳下一題！';
+      }
+
+      updateStudentScoreUI();
+      updateStudentStatsUI();
+      renderCurrentTargetWord('');
+      const inputEl = document.getElementById('student-typing-input');
+      inputEl.value = '';
+      inputEl.disabled = true;
+    }
+
+    function startStudentGameplay() {
+      const st = state.student;
+      st.isPlaying = true;
+      const inputEl = document.getElementById('student-typing-input');
+      inputEl.disabled = false;
+      inputEl.focus();
+
+      clearInterval(st.timerInterval);
+      st.timerInterval = setInterval(() => {
+        st.timeLeft--;
+        document.getElementById('battle-timer').textContent = Math.max(0, st.timeLeft);
+        updateStudentStatsUI();
+
+        if (st.timeLeft <= 0) {
+          finishStudentGameplay();
+        }
+      }, 1000);
+    }
+
+    // 渲染目標題目與逐字即時顏色回饋 (英文模式自動轉小寫比對)
+    function renderCurrentTargetWord(typedValue) {
+      const st = state.student;
+      const rawTarget = st.wordList[st.currentIndex % st.wordList.length] || 'apple';
+      const target = st.mode === 'en' ? rawTarget.toLowerCase() : rawTarget;
+      const compareTyped = st.mode === 'en' ? typedValue.toLowerCase() : typedValue;
+      const displayEl = document.getElementById('target-word-display');
+
+      if (st.mode === 'zh' && st.isComposing) {
+        displayEl.innerHTML = `<span class="text-slate-800">${escapeHtml(target)}</span>`;
+        return;
+      }
+
+      let html = '';
+      for (let i = 0; i < target.length; i++) {
+        const targetChar = target[i];
+        const safeChar = targetChar === ' ' ? '&nbsp;' : escapeHtml(targetChar);
+        if (i < compareTyped.length) {
+          if (compareTyped[i] === targetChar) {
+            html += `<span class="text-emerald-600">${safeChar}</span>`;
+          } else {
+            html += `<span class="text-rose-600 bg-rose-100 rounded px-0.5">${safeChar}</span>`;
+          }
+        } else if (i === compareTyped.length) {
+          html += `<span class="text-slate-900 border-b-4 border-indigo-500">${safeChar}</span>`;
+        } else {
+          html += `<span class="text-slate-400">${safeChar}</span>`;
+        }
+      }
+      displayEl.innerHTML = html;
+    }
+
+    // 綁定輸入框事件 (完整支援中文 IME 注音/倉頡組字)
+    const typingInput = document.getElementById('student-typing-input');
+
+    typingInput.addEventListener('compositionstart', () => {
+      state.student.isComposing = true;
+    });
+
+    typingInput.addEventListener('compositionend', () => {
+      state.student.isComposing = false;
+      handleStudentInputEvaluation();
+    });
+
+    typingInput.addEventListener('input', () => {
+      if (!state.student.isPlaying) return;
+      playTone('key');
+      if (!state.student.isComposing) {
+        handleStudentInputEvaluation();
+      }
+    });
+
+    typingInput.addEventListener('keydown', (e) => {
+      if (!state.student.isPlaying) return;
+      if (e.key === 'Enter' && !state.student.isComposing) {
+        e.preventDefault();
+        checkSubmitWord(true);
+      }
+    });
+
+    function handleStudentInputEvaluation() {
+      const st = state.student;
+      if (!st.isPlaying) return;
+
+      const rawTarget = st.wordList[st.currentIndex % st.wordList.length];
+      const target = st.mode === 'en' ? rawTarget.toLowerCase() : rawTarget;
+      const val = st.mode === 'en' ? typingInput.value.toLowerCase() : typingInput.value;
+
+      renderCurrentTargetWord(val);
+
+      if (val === target) {
+        checkSubmitWord(false);
+      }
+    }
+
+    function checkSubmitWord(isManualEnter) {
+      const st = state.student;
+      const rawTarget = st.wordList[st.currentIndex % st.wordList.length];
+      const target = st.mode === 'en' ? rawTarget.toLowerCase() : rawTarget;
+      const val = st.mode === 'en' ? typingInput.value.toLowerCase() : typingInput.value;
+
+      st.totalKeystrokes += Math.max(1, val.length);
+
+      if (val === target) {
+        playTone('score');
+        st.wordsDone += 1;
+        st.correctChars += target.length;
+        st.combo += 1;
+        st.maxCombo = Math.max(st.maxCombo, st.combo);
+
+        const basePoints = 10 + target.length * 2;
+        const comboBonus = Math.min(15, st.combo * 2);
+        st.score += basePoints + comboBonus;
+
+        // 顯示連擊徽章
+        const comboBadge = document.getElementById('combo-badge');
+        if (st.combo >= 2) {
+          document.getElementById('combo-count').textContent = st.combo;
+          comboBadge.classList.remove('hidden');
+        }
+
+        // 跳下一題
+        st.currentIndex += 1;
+        typingInput.value = '';
+        renderCurrentTargetWord('');
+        updateStudentScoreUI();
+        updateStudentStatsUI();
+        sendStudentProgressToTeacher();
+      } else if (isManualEnter) {
+        playTone('error');
+        st.combo = 0;
+        document.getElementById('combo-badge').classList.add('hidden');
+        const card = document.getElementById('typing-card');
+        card.classList.remove('animate-shake');
+        void card.offsetWidth;
+        card.classList.add('animate-shake');
+        updateStudentStatsUI();
+      }
+    }
+
+    function updateStudentScoreUI() {
+      const st = state.student;
+      document.getElementById('battle-my-score').textContent = st.score;
+      document.getElementById('battle-opp-score').textContent = st.oppScore;
+
+      const total = st.score + st.oppScore;
+      const myPct = total === 0 ? 50 : Math.min(90, Math.max(10, Math.round((st.score / total) * 100)));
+      document.getElementById('battle-tug-bar').style.width = `${myPct}%`;
+
+      const hint = document.getElementById('battle-status-hint');
+      if (st.score > st.oppScore) {
+        hint.textContent = `🔥 領先對手 ${st.score - st.oppScore} 分！`;
+        hint.className = 'text-sky-300 font-black';
+      } else if (st.score < st.oppScore) {
+        hint.textContent = `⚡ 落後 ${st.oppScore - st.score} 分，快追上！`;
+        hint.className = 'text-orange-300 font-black';
+      } else {
+        hint.textContent = '⚔️ 雙方平手！';
+        hint.className = 'text-amber-300 font-bold';
+      }
+    }
+
+    function updateStudentStatsUI() {
+      const st = state.student;
+      const elapsedSec = Math.max(1, st.duration - st.timeLeft);
+      const elapsedMin = elapsedSec / 60;
+      const speed = st.mode === 'en'
+        ? Math.round((st.correctChars / 5) / elapsedMin)
+        : Math.round(st.correctChars / elapsedMin);
+      const acc = st.totalKeystrokes === 0
+        ? 100
+        : Math.min(100, Math.round((st.correctChars / st.totalKeystrokes) * 100));
+
+      document.getElementById('stat-wpm').textContent = speed;
+      document.getElementById('stat-accuracy').textContent = `${acc}%`;
+      document.getElementById('stat-max-combo').textContent = st.maxCombo;
+      return { speed, acc };
+    }
+
+    function sendStudentProgressToTeacher() {
+      const st = state.student;
+      if (st.conn && st.conn.open) {
+        const { speed, acc } = updateStudentStatsUI();
+        st.conn.send({
+          type: 'progress',
+          score: st.score,
+          wordsDone: st.wordsDone,
+          wpm: speed,
+          accuracy: acc,
+          combo: st.combo
+        });
+      }
+    }
+
+    function finishStudentGameplay() {
+      const st = state.student;
+      if (!st.isPlaying && !document.getElementById('student-result-view').classList.contains('hidden')) {
+        return;
+      }
+      st.isPlaying = false;
+      clearInterval(st.timerInterval);
+      clearInterval(st.soloBotInterval);
+      typingInput.disabled = true;
+
+      sendStudentProgressToTeacher();
+      const { speed, acc } = updateStudentStatsUI();
+
+      showStudentSubView('student-result-view');
+      document.getElementById('res-my-score').textContent = st.score;
+      document.getElementById('res-opp-score').textContent = st.oppScore;
+      document.getElementById('res-opp-label').textContent = `${st.opponentName} 得分`;
+      document.getElementById('res-words-done').textContent = `${st.wordsDone} 題`;
+      document.getElementById('res-wpm').textContent = `${speed} ${st.mode === 'en' ? 'WPM' : '字/分'}`;
+      document.getElementById('res-acc').textContent = `${acc}%`;
+
+      const iconEl = document.getElementById('result-trophy-icon');
+      const titleEl = document.getElementById('result-title');
+      const subEl = document.getElementById('result-subtitle');
+
+      if (st.score > st.oppScore) {
+        iconEl.textContent = '🏆';
+        titleEl.textContent = '恭喜獲勝！';
+        subEl.textContent = '太厲害了！你的打字速度無人能敵！';
+      } else if (st.score < st.oppScore) {
+        iconEl.textContent = '💪';
+        titleEl.textContent = '表現很棒，繼續加油！';
+        subEl.textContent = '差一點點就追上了，下一局一定能贏回來！';
+      } else {
+        iconEl.textContent = '🤝';
+        titleEl.textContent = '精彩平手！';
+        subEl.textContent = '雙方實力旗鼓相當，真是場好比賽！';
+      }
+
+      // 單機模式顯示再玩一次按鈕
+      const isSolo = state.role === 'solo';
+      document.getElementById('solo-rematch-box').classList.toggle('hidden', !isSolo);
+      document.getElementById('result-wait-hint').classList.toggle('hidden', isSolo);
+    }
+  </script>
+</body>
+</html>
